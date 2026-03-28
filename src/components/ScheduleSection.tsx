@@ -41,18 +41,21 @@ const ScheduleSection = () => {
           console.log("[Schedule] tentando carregar:", url);
           const res = await fetch(url);
           if (!res.ok) {
-            // eslint-disable-next-line no-console
             console.warn(`[Schedule] sem sucesso ${res.status} para ${url}`);
             continue;
           }
           const text = await res.text();
+          // log do conteúdo recebido para depurar
+          // eslint-disable-next-line no-console
+          console.log("[Schedule] resposta bruta de", url, text.slice(0, 400));
           // verificar se veio JSON (protege contra HTML retornado pelo servidor)
           if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
-            // eslint-disable-next-line no-console
             console.warn("[Schedule] resposta não é JSON:", url);
             continue;
           }
           data = JSON.parse(text) as SpecialEvent[];
+          // eslint-disable-next-line no-console
+          console.log("[Schedule] dados parseados:", data);
           // se chegou aqui, temos dados válidos
           break;
         } catch (err) {
