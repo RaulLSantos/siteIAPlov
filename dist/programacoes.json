@@ -1,0 +1,14 @@
+[
+  { "name": "Vigília de Oração", "date": "2026-04-03", "description": "Noite de oração e louvor" },
+  { "name": "Encontro de Casais", "date": "2026-04-25", "description": "Último sábado do mês" },
+  { "name": "Culto das Crianças", "date": "2026-05-03", "description": "1º domingo do mês" },
+  { "name": "Vigília de Oração", "date": "2026-05-01", "description": "Primeira sexta-feira do mês" },
+  { "name": "Encontro de Casais", "date": "2026-05-30", "description": "Último sábado do mês" },
+  { "name": "Culto das Crianças", "date": "2026-06-07", "description": "1º domingo do mês" },
+  { "name": "Vigília de Oração", "date": "2026-06-05", "description": "Primeira sexta-feira do mês" },
+  { "name": "Conferência Missionária", "date": "2026-07-10", "description": "Evento especial de missões" },
+  { "name": "Encontro de Jovens", "date": "2026-08-15", "description": "Retiro espiritual de jovens" },
+  { "name": "Aniversário da Igreja", "date": "2026-09-20", "description": "Celebração especial" },
+  { "name": "Encontro de Casais", "date": "2026-10-31", "description": "Último sábado do mês" },
+  { "name": "Cantata de Natal", "date": "2026-12-20", "description": "Apresentação musical natalina" }
+]
