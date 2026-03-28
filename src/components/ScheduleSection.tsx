@@ -35,9 +35,6 @@ const ScheduleSection = () => {
       let data: SpecialEvent[] | null = null;
       for (const url of candidates) {
         try {
-          // log para depuração
-          // abra DevTools -> Console/Network para ver qual URL foi testado
-          // eslint-disable-next-line no-console
           console.log("[Schedule] tentando carregar:", url);
           const res = await fetch(url);
           if (!res.ok) {
@@ -45,22 +42,38 @@ const ScheduleSection = () => {
             continue;
           }
           const text = await res.text();
-          // log do conteúdo recebido para depurar
-          // eslint-disable-next-line no-console
-          console.log("[Schedule] resposta bruta de", url, text.slice(0, 400));
-          // verificar se veio JSON (protege contra HTML retornado pelo servidor)
+          console.log("[Schedule] resposta bruta de", url, text.slice(0, 300));
           if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
             console.warn("[Schedule] resposta não é JSON:", url);
             continue;
           }
           data = JSON.parse(text) as SpecialEvent[];
-          // eslint-disable-next-line no-console
           console.log("[Schedule] dados parseados:", data);
-          // se chegou aqui, temos dados válidos
           break;
         } catch (err) {
-          // eslint-disable-next-line no-console
           console.error("[Schedule] erro ao buscar:", url, err);
+        }
+      }
+
+      // fallback: buscar direto no raw do GitHub (somente para teste)
+      if (!data) {
+        const raw = "https://raw.githubusercontent.com/RaulLSantos/siteIAPlov/main/dist/programacoes.json";
+        try {
+          console.log("[Schedule] tentando fallback raw:", raw);
+          const r = await fetch(raw);
+          if (r.ok) {
+            const txt = await r.text();
+            if (txt.trim().startsWith("[") || txt.trim().startsWith("{")) {
+              data = JSON.parse(txt) as SpecialEvent[];
+              console.log("[Schedule] dados do fallback:", data);
+            } else {
+              console.warn("[Schedule] fallback não retornou JSON");
+            }
+          } else {
+            console.warn("[Schedule] fallback falhou:", r.status);
+          }
+        } catch (err) {
+          console.error("[Schedule] erro no fallback:", err);
         }
       }
 
