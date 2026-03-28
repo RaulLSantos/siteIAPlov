@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Clock, CalendarDays, Star } from "lucide-react";
 
 const regularSchedule = [
@@ -14,26 +14,37 @@ interface SpecialEvent {
   description: string;
 }
 
+const parseLocalDate = (dateStr: string) => {
+  // Cria uma Date no fuso local a partir da string "YYYY-MM-DD"
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 const ScheduleSection = () => {
   const [specialEvents, setSpecialEvents] = useState<SpecialEvent[]>([]);
 
   useEffect(() => {
-    fetch("/programacoes.json")
+    const base = (import.meta as any).env?.BASE_URL ?? "/";
+    fetch(`${base}programacoes.json`)
       .then((res) => res.json())
       .then((data: SpecialEvent[]) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+
         const upcoming = data
-          .filter((e) => new Date(e.date) >= today)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(0, 3);
+          .map((e) => ({ ...e, _date: parseLocalDate(e.date) }))
+          .filter((e) => e._date.getTime() >= today.getTime())
+          .sort((a, b) => a._date.getTime() - b._date.getTime())
+          .slice(0, 3)
+          .map(({ _date, ...rest }) => rest);
+
         setSpecialEvents(upcoming);
       })
       .catch(() => setSpecialEvents([]));
   }, []);
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
+    const date = parseLocalDate(dateStr);
     return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
   };
 
