@@ -15,7 +15,6 @@ interface SpecialEvent {
 }
 
 const parseLocalDate = (dateStr: string) => {
-  // Cria uma Date no fuso local a partir da string "YYYY-MM-DD"
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
@@ -25,22 +24,62 @@ const ScheduleSection = () => {
 
   useEffect(() => {
     const base = (import.meta as any).env?.BASE_URL ?? "/";
-    fetch(`${base}programacoes.json`)
-      .then((res) => res.json())
-      .then((data: SpecialEvent[]) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    const candidates = [
+      `${base}programacoes.json`,
+      `${base}public/programacoes.json`,
+      `/programacoes.json`,
+      `programacoes.json`,
+    ];
 
-        const upcoming = data
-          .map((e) => ({ ...e, _date: parseLocalDate(e.date) }))
-          .filter((e) => e._date.getTime() >= today.getTime())
-          .sort((a, b) => a._date.getTime() - b._date.getTime())
-          .slice(0, 3)
-          .map(({ _date, ...rest }) => rest);
+    const fetchFirstAvailable = async () => {
+      let data: SpecialEvent[] | null = null;
+      for (const url of candidates) {
+        try {
+          // log para depuração
+          // abra DevTools -> Console/Network para ver qual URL foi testado
+          // eslint-disable-next-line no-console
+          console.log("[Schedule] tentando carregar:", url);
+          const res = await fetch(url);
+          if (!res.ok) {
+            // eslint-disable-next-line no-console
+            console.warn(`[Schedule] sem sucesso ${res.status} para ${url}`);
+            continue;
+          }
+          const text = await res.text();
+          // verificar se veio JSON (protege contra HTML retornado pelo servidor)
+          if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
+            // eslint-disable-next-line no-console
+            console.warn("[Schedule] resposta não é JSON:", url);
+            continue;
+          }
+          data = JSON.parse(text) as SpecialEvent[];
+          // se chegou aqui, temos dados válidos
+          break;
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("[Schedule] erro ao buscar:", url, err);
+        }
+      }
 
-        setSpecialEvents(upcoming);
-      })
-      .catch(() => setSpecialEvents([]));
+      if (!data) {
+        setSpecialEvents([]);
+        return;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const upcoming = data
+        .map((e) => ({ ...e, _date: parseLocalDate(e.date) }))
+        .filter((e) => e._date.getTime() >= today.getTime())
+        .sort((a, b) => a._date.getTime() - b._date.getTime())
+        .slice(0, 3)
+        .map(({ _date, ...rest }) => rest);
+
+      setSpecialEvents(upcoming);
+    };
+
+    fetchFirstAvailable();
   }, []);
 
   const formatDate = (dateStr: string) => {
@@ -62,7 +101,6 @@ const ScheduleSection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Regular */}
           <div className="bg-muted/40 rounded-lg p-8 border border-border/50">
             <div className="flex items-center gap-3 mb-6">
               <Clock size={22} className="text-primary" />
@@ -81,7 +119,6 @@ const ScheduleSection = () => {
             </ul>
           </div>
 
-          {/* Special */}
           <div className="bg-primary/5 rounded-lg p-8 border border-primary/10">
             <div className="flex items-center gap-3 mb-6">
               <Star size={22} className="text-accent" />
