@@ -37,7 +37,7 @@ const ScheduleSection = () => {
       for (const url of candidates) {
         try {
           console.log("[Schedule] tentando carregar:", url);
-          const res = await fetch(url);
+          const res = await fetch(url, { cache: "no-store" });
           if (!res.ok) {
             console.warn(`[Schedule] sem sucesso ${res.status} para ${url}`);
             continue;
@@ -61,7 +61,7 @@ const ScheduleSection = () => {
         const raw = "https://raw.githubusercontent.com/RaulLSantos/siteIAPlov/main/dist/programacoes.json";
         try {
           console.log("[Schedule] tentando fallback raw:", raw);
-          const r = await fetch(raw);
+          const r = await fetch(raw, { cache: "no-store" });
           if (r.ok) {
             const txt = await r.text();
             console.log("[Schedule] respuesta raw (primeiros 400 chars):", txt.slice(0, 400));
