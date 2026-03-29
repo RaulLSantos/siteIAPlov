@@ -37,7 +37,7 @@ const ScheduleSection = () => {
       for (const url of candidates) {
         try {
           console.log("[Schedule] tentando carregar:", url);
-          const res = await fetch(url, { cache: "no-store" });
+          const res = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
           if (!res.ok) {
             console.warn(`[Schedule] sem sucesso ${res.status} para ${url}`);
             continue;
