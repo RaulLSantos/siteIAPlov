@@ -31,6 +31,7 @@ const ScheduleSection = () => {
       `programacoes.json`,
     ];
 
+    // Substitua a função fetchFirstAvailable pelo código abaixo (mantém comportamento atual + logs)
     const fetchFirstAvailable = async () => {
       let data: SpecialEvent[] | null = null;
       for (const url of candidates) {
@@ -42,7 +43,7 @@ const ScheduleSection = () => {
             continue;
           }
           const text = await res.text();
-          console.log("[Schedule] resposta bruta de", url, text.slice(0, 300));
+          console.log("[Schedule] resposta bruta de", url, text.slice(0, 400));
           if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
             console.warn("[Schedule] resposta não é JSON:", url);
             continue;
@@ -55,7 +56,7 @@ const ScheduleSection = () => {
         }
       }
 
-      // fallback: buscar direto no raw do GitHub (somente para teste)
+      // fallback raw (somente teste)
       if (!data) {
         const raw = "https://raw.githubusercontent.com/RaulLSantos/siteIAPlov/main/dist/programacoes.json";
         try {
@@ -63,6 +64,7 @@ const ScheduleSection = () => {
           const r = await fetch(raw);
           if (r.ok) {
             const txt = await r.text();
+            console.log("[Schedule] respuesta raw (primeiros 400 chars):", txt.slice(0, 400));
             if (txt.trim().startsWith("[") || txt.trim().startsWith("{")) {
               data = JSON.parse(txt) as SpecialEvent[];
               console.log("[Schedule] dados do fallback:", data);
@@ -78,20 +80,28 @@ const ScheduleSection = () => {
       }
 
       if (!data) {
+        console.log("[Schedule] sem dados após todas tentativas.");
         setSpecialEvents([]);
         return;
       }
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      console.log("[Schedule] hoje (midnight):", today.toISOString());
 
-      const upcoming = data
-        .map((e) => ({ ...e, _date: parseLocalDate(e.date) }))
+      const withDates = data.map((e) => {
+        const d = parseLocalDate(e.date);
+        console.log("[Schedule] evento:", e.name, "dateStr:", e.date, "parsed:", d.toISOString(), "ts:", d.getTime());
+        return { ...e, _date: d };
+      });
+
+      const upcoming = withDates
         .filter((e) => e._date.getTime() >= today.getTime())
         .sort((a, b) => a._date.getTime() - b._date.getTime())
         .slice(0, 3)
         .map(({ _date, ...rest }) => rest);
 
+      console.log("[Schedule] upcoming selecionados:", upcoming);
       setSpecialEvents(upcoming);
     };
 
