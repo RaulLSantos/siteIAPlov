@@ -1,10 +1,10 @@
-import logo from "@/assets/logo-iap.png";
+﻿import logo from "@/assets/logo-iap.png";
 
 const Footer = () => {
   return (
     <footer className="bg-primary py-10">
       <div className="container px-4 text-center">
-        <img alt="Igreja Adventista da Promessa" className="h-12 mx-auto mb-4 brightness-0 invert opacity-80 border-0 border-none border-[#bc7b7b]" src="/lovable-uploads/dca9d95a-fe63-4219-b271-988cc28a00b2.png" />
+              <img alt="Igreja Adventista da Promessa" className="h-12 mx-auto mb-4 brightness-0 invert opacity-80 border-0 border-none border-[#bc7b7b]" src={logo} />
         <p className="text-primary-foreground/70 font-body text-sm">
           © {new Date().getFullYear()} Igreja Adventista da Promessa. Todos os direitos reservados.
         </p>

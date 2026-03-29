@@ -17,7 +17,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-sm">
       <div className="container flex items-center justify-between h-16 md:h-20">
         <a href="#home" className="flex items-center gap-2">
-          <img alt="Igreja Adventista da Promessa" className="h-10 md:h-14 w-auto" src="/lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png" />
+          <img alt="Igreja Adventista da Promessa" className="h-10 md:h-14 w-auto" src={logo} />
         </a>
 
         {/* Desktop */}
