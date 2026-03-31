@@ -9,7 +9,6 @@ const navItems = [
 { label: "Agenda", href: "#agenda" },
 { label: "Contato", href: "#contato" }];
 
-
 const Navbar = () => {
   const [open, setOpen] = useState(false);
 
@@ -17,7 +16,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-sm">
       <div className="container flex items-center justify-between h-16 md:h-20">
         <a href="#home" className="flex items-center gap-2">
-          <img alt="Logotipo IAP" className="h-10 md:h-14 w-auto" src={logo} />
+          <img src={logo} alt="Logotipo" className="h-10 md:h-14 w-auto" />
         </a>
 
         {/* Desktop */}
