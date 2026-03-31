@@ -1,4 +1,4 @@
-﻿import logo from "@/assets/logo-iap.png";
+﻿import logo from "@/assets/logo-iap.jpg";
 
 const Footer = () => {
   return (

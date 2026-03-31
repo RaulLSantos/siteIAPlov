@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/logo-iap.png";
+import logo from "@/assets/logo-iap.jpg";
 
 const navItems = [
 { label: "Home", href: "#home" },
