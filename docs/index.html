@@ -34,5 +34,32 @@
 
   <body>
     <div id="root"></div>
+
+
+<!-- Cabeçalho estático mínimo (apenas logo e título). Resolve via <base> e não duplica o menu do React. -->
+<header id="static-header" style="display:flex;align-items:center;gap:12px;padding:0.6rem 1rem;background:var(--sidebar-background);box-shadow:0 1px 0 rgba(0,0,0,0.04);">
+  <a href="#home" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+    <img src="lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png" alt="Logotipo Igreja Adventista da Promessa" style="height:40px;object-fit:contain" />
+    <span style="font-size:1rem;font-weight:500">Igreja Adventista da Promessa</span>
+  </a>
+  <!-- Espaço reservado para o menu (React renderiza o menu real quando montar) -->
+  <div style="margin-left:auto"></div>
+</header>
+
+<!-- Remove o cabeçalho estático quando o React monta (evita duplicação visual) -->
+<script>
+  (function () {
+    // aguarda o DOM e depois espera curto prazo para o React montar
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const header = document.getElementById('static-header');
+        // se o root já tiver filhos (React montou), oculta o header estático
+        if (header && document.getElementById('root')?.children.length > 0) {
+          header.style.display = 'none';
+        }
+      }, 700);
+    });
+  })();
+</script>
   </body>
 </html>
