@@ -20,16 +20,28 @@ const Navbar = () => {
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
-        // tenta usar o caminho público se existir (HEAD), caso contrário mantém o asset local
-        const candidate = `${import.meta.env.BASE_URL}${remotePath}`;
+        // resolve o caminho DO LADO DO CLIENTE usando o <base> do HTML
+        const candidate = (() => {
+            try {
+                // document.baseURI respeita o <base href="...">
+                return new URL(remotePath, document.baseURI).href;
+            } catch {
+                // fallback: usar import.meta.env.BASE_URL (pode estar incorreto em alguns cenários)
+                return `${import.meta.env.BASE_URL ?? ""}${remotePath}`;
+            }
+        })();
+
+        // Verifica existência com HEAD antes de trocar a src para evitar 404 visível
         fetch(candidate, { method: "HEAD" })
             .then((res) => {
                 if (res.ok) {
                     setLogoSrc(candidate);
+                } else {
+                    console.warn("[Navbar] logo remoto não disponível:", candidate, "status:", res.status);
                 }
             })
-            .catch(() => {
-                // falha na verificação remota — permanece com logoLocal
+            .catch((err) => {
+                console.warn("[Navbar] falha ao verificar logo remoto:", err);
             });
 
         // Log de depuração: mostra a src no runtime e estilos computados

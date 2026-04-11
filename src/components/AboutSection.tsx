@@ -1,8 +1,8 @@
-import { BookOpen, Eye, Heart } from "lucide-react";
+﻿import { BookOpen, Eye, Heart } from "lucide-react";
 
 const values = [
-  { icon: BookOpen, title: "Missão", text: "Proclamar o Evangelho de Jesus Cristo, fazendo discípulos e edificando vidas através da Palavra de Deus." },
-  { icon: Eye, title: "Visão", text: "Ser uma igreja relevante e acolhedora, transformando vidas e comunidades pelo poder do Espírito Santo." },
+    { icon: BookOpen, title: "Missão", text: "Nossa missão é adorar a Deus, proclamar a Jesus Cristo e fazer discípulos no poder do Espírito Santo." },
+    { icon: Eye, title: "Visão", text: "Cada promessista sendo missionário no poder do Espírito Santo." },
   { icon: Heart, title: "Valores", text: "Fé, amor, comunhão, serviço ao próximo, ensino bíblico e compromisso com a obra de Deus." },
 ];
 
