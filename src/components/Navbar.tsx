@@ -1,4 +1,4 @@
-﻿import { useState, type MouseEvent } from "react";
+﻿import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
 // fallback de build: import do asset presente no projeto (igual Footer)
 import logoLocal from "@/assets/logo-iap.jpg";
@@ -16,6 +16,32 @@ const navItems = [
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
+    const imgRef = useRef<HTMLImageElement | null>(null);
+
+    useEffect(() => {
+        // Log de depuração: mostra a src no runtime e estilos computados
+        const img = imgRef.current;
+        if (img) {
+            console.log("[Navbar] logo src:", img.src);
+            const cs = getComputedStyle(img);
+            console.log(
+                "[Navbar] computed styles - display:",
+                cs.display,
+                "width:",
+                cs.width,
+                "height:",
+                cs.height,
+                "opacity:",
+                cs.opacity,
+                "visibility:",
+                cs.visibility,
+                "object-fit:",
+                cs.objectFit
+            );
+        } else {
+            console.warn("[Navbar] logo img não encontrada no DOM");
+        }
+    }, []);
 
     const handleNavigate = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
         e.preventDefault();
@@ -25,7 +51,6 @@ const Navbar = () => {
             if (el) {
                 el.scrollIntoView({ behavior: "smooth" });
             } else {
-                // fallback para alterar hash caso o elemento não exista na página atual
                 window.location.hash = href;
             }
         } else {
@@ -38,17 +63,23 @@ const Navbar = () => {
         <>
             <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-sm">
                 <div className="container flex items-center justify-between h-16 md:h-20">
-                    <a href="#home" className="flex items-center gap-2" onClick={(e) => handleNavigate(e, "#home")}>
+                    <a
+                        href="#home"
+                        className="flex items-center gap-2"
+                        onClick={(e) => handleNavigate(e, "#home")}
+                    >
                         <img
-                            src={logoLocal}
+                            ref={imgRef}
+                            src={remoteLogo} // tenta publicar a imagem primeiro
                             alt="Logotipo"
                             className="h-10 md:h-14 w-auto object-contain"
+                            // borda temporária para visualizar se o elemento está renderizando
+                            style={{ border: "2px solid rgba(255,0,0,0.6)" }}
                             onError={(ev) => {
-                                // se o import falhar por algum motivo, tenta o arquivo em docs/lovable-uploads
                                 const img = ev.currentTarget as HTMLImageElement;
-                                if (img.src !== remoteLogo) {
+                                if (img.src !== logoLocal) {
                                     img.onerror = null;
-                                    img.src = remoteLogo;
+                                    img.src = logoLocal;
                                 }
                             }}
                         />
