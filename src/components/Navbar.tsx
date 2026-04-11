@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import logoLocal from "@/assets/logo-iap.jpg";
 
 // caminho público em docs (fallback remoto)
-const remoteLogo = `${import.meta.env.BASE_URL}lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png`;
+const remotePath = "lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png";
 
 const navItems = [
     { label: "Home", href: "#home" },
@@ -16,13 +16,26 @@ const navItems = [
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
+    const [logoSrc, setLogoSrc] = useState<string>(logoLocal);
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
+        // tenta usar o caminho público se existir (HEAD), caso contrário mantém o asset local
+        const candidate = `${import.meta.env.BASE_URL}${remotePath}`;
+        fetch(candidate, { method: "HEAD" })
+            .then((res) => {
+                if (res.ok) {
+                    setLogoSrc(candidate);
+                }
+            })
+            .catch(() => {
+                // falha na verificação remota — permanece com logoLocal
+            });
+
         // Log de depuração: mostra a src no runtime e estilos computados
         const img = imgRef.current;
         if (img) {
-            console.log("[Navbar] logo src:", img.src);
+            console.log("[Navbar] logo src (initial):", img.src);
             const cs = getComputedStyle(img);
             console.log(
                 "[Navbar] computed styles - display:",
@@ -70,11 +83,9 @@ const Navbar = () => {
                     >
                         <img
                             ref={imgRef}
-                            src={remoteLogo} // tenta publicar a imagem primeiro
+                            src={logoSrc}
                             alt="Logotipo"
                             className="h-10 md:h-14 w-auto object-contain"
-                            // borda temporária para visualizar se o elemento está renderizando
-                            style={{ border: "2px solid rgba(255,0,0,0.6)" }}
                             onError={(ev) => {
                                 const img = ev.currentTarget as HTMLImageElement;
                                 if (img.src !== logoLocal) {
