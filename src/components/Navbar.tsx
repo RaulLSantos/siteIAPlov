@@ -1,8 +1,10 @@
 ﻿import { useState, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
+// fallback de build: import do asset presente no projeto (igual Footer)
+import logoLocal from "@/assets/logo-iap.jpg";
 
-// usar caminho relativo ao base URL do Vite para resolver corretamente em produção
-const logoPath = `${import.meta.env.BASE_URL}lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png`;
+// caminho público em docs (fallback remoto)
+const remoteLogo = `${import.meta.env.BASE_URL}lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png`;
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -37,7 +39,19 @@ const Navbar = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-sm">
         <div className="container flex items-center justify-between h-16 md:h-20">
           <a href="#home" className="flex items-center gap-2" onClick={(e) => handleNavigate(e, "#home")}>
-            <img src={logoPath} alt="Logotipo" className="h-10 md:h-14 w-auto" />
+            <img
+              src={logoLocal}
+              alt="Logotipo"
+              className="h-10 md:h-14 w-auto object-contain"
+              onError={(ev) => {
+                // se o import falhar por algum motivo, tenta o arquivo em docs/lovable-uploads
+                const img = ev.currentTarget as HTMLImageElement;
+                if (img.src !== remoteLogo) {
+                  img.onerror = null;
+                  img.src = remoteLogo;
+                }
+              }}
+            />
           </a>
 
           {/* Desktop */}
