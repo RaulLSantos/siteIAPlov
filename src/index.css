@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -49,7 +49,21 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --nav-height: 4rem; /* h-16 = 4rem */
   }
+}
+
+/* navbar maior em telas md+ (h-20 = 5rem) */
+@media (min-width: 768px) {
+  :root {
+    --nav-height: 5rem;
+  }
+}
+
+/* aplica offset para ancoragem em todos os targets com id (se preferir, use apenas #home, #sobre, etc.) */
+[id] {
+  scroll-margin-top: calc(var(--nav-height) + 0.25rem);
 }
 
 @layer base {
