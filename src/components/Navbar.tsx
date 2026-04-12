@@ -74,7 +74,13 @@ const Navbar = () => {
         if (id) {
             const el = document.getElementById(id);
             if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
+                // calcula offset do topo para compensar o navbar fixo
+                const nav = document.querySelector("nav");
+                const navHeight = nav ? (nav as HTMLElement).offsetHeight : 0;
+                const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
+                window.scrollTo({ top, behavior: "smooth" });
+                // atualiza hash sem pular instantaneamente
+                history.replaceState(null, "", `#${id}`);
             } else {
                 window.location.hash = href;
             }
@@ -106,6 +112,10 @@ const Navbar = () => {
                                 }
                             }}
                         />
+                        {/* Nome da igreja junto ao logo */}
+                        <span className="hidden sm:inline-block ml-2 text-sm md:text-base font-medium font-body">
+                          Igreja Adventista da Promessa
+                        </span>
                     </a>
 
                     {/* Desktop */}
