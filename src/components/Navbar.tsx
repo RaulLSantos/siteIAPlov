@@ -48,10 +48,9 @@ const Navbar = () => {
         if (id) {
             const el = document.getElementById(id);
             if (el) {
-                const nav = document.querySelector("nav");
-                const navHeight = nav ? (nav as HTMLElement).offsetHeight : 0;
-                const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
-                window.scrollTo({ top, behavior: "smooth" });
+                // Use scrollIntoView para respeitar scroll-margin-top definido em CSS
+                // Isso melhora o comportamento em mobile/tablet e preserva o desktop.
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
 
                 try {
                     history.replaceState(null, "", `#${id}`);
@@ -89,7 +88,11 @@ const Navbar = () => {
                                 }
                             }}
                         />
-                        <span className="hidden sm:inline-block ml-2 text-sm md:text-base font-medium font-body">
+                        {/* Mostrar o nome também em mobile/tablet:
+                            - removido o `hidden sm:inline-block`
+                            - limitar largura e truncar para não quebrar layout
+                        */}
+                        <span className="ml-2 text-sm md:text-base font-medium font-body max-w-[140px] sm:max-w-[220px] truncate">
                           Igreja Adventista da Promessa
                         </span>
                     </a>

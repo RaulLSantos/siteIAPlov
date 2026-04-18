@@ -6,10 +6,11 @@ const WHATSAPP_URL = "https://wa.me/5545999424023";
 
 const HeroSection = () => {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    // Ajuste responsivo: altura menor em mobile/tablet para melhorar corte da imagem
+    <section id="home" className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
-        <img src={heroImg} alt="Culto de adoração" className="w-full h-full object-cover" />
+        <img src={heroImg} alt="Culto de adoração" className="w-full h-full object-cover object-center" />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-primary/90" />
       </div>
 
