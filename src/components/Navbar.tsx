@@ -20,7 +20,7 @@ const Navbar = () => {
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
-        // resolve o caminho DO LADO DO CLIENTE usando o <base> do HTML
+        // resolve o caminho DO LADO DO CLIENTE usando import.meta.env.BASE_URL ou document.baseURI
         const candidate = (() => {
             try {
                 // document.baseURI respeita o <base href="...">
