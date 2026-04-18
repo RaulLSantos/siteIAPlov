@@ -15,13 +15,50 @@
     <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0917593d-2642-4888-bbbf-fe1ff28b4451/id-preview-f10d1b75--9ca2b758-6928-4226-85b6-1730a5aa7898.lovable.app-1773345661310.png">
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- Favicons: use %BASE_URL% para produzir caminhos corretos em produção -->
+    <!-- Favicons: prefer public/favicon.png, public/favicon.ico; fallback programático abaixo -->
     <link rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%favicon.png">
     <link rel="shortcut icon" href="%BASE_URL%favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="%BASE_URL%favicon.png">
 
     <!-- script / css serão gravados pelo build com base correta -->
     <script type="module" src="%BASE_URL%src/main.tsx"></script>
+
+    <!-- Fallback runtime para favicon:
+         - tenta carregar %BASE_URL%favicon.png
+         - em caso de erro (404) usa %BASE_URL%assets/logo-iap.jpg como fallback
+         Isso cobre dev e produção sem exigir alteração de outros arquivos. -->
+    <script>
+      (function () {
+        try {
+          const base = '%BASE_URL%';
+          const primary = base + 'favicon.png';
+          const fallback = base + 'assets/logo-iap.jpg';
+
+          function setFavicon(href) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.getElementsByTagName('head')[0].appendChild(link);
+            }
+            link.href = href;
+          }
+
+          const probe = new Image();
+          probe.onload = function () {
+            setFavicon(primary);
+          };
+          probe.onerror = function () {
+            setFavicon(fallback);
+          };
+          // dispara a checagem
+          probe.src = primary;
+        } catch (e) {
+          // não atrapalhar o carregamento da página se algo falhar
+          console.warn('[favicon-fallback] erro:', e);
+        }
+      })();
+    </script>
   </head>
 
   <body>
@@ -29,7 +66,7 @@
     <noscript>
       <header id="static-header-noscript" style="display:flex;align-items:center;gap:12px;padding:0.6rem 1rem;background:rgba(255,255,255,0.95);box-shadow:0 1px 0 rgba(0,0,0,0.04);z-index:999;">
         <a href="#home" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
-          <!-- logo estático vindo de public/assets/ -->
+          <!-- logo estático vindo de public/docs assets/ -->
           <img src="%BASE_URL%assets/logo-iap.jpg" alt="Logotipo Igreja Adventista da Promessa" style="height:36px;object-fit:contain" />
           <span id="static-site-title" style="font-size:1rem;font-weight:500;white-space:nowrap;">Igreja Adventista da Promessa</span>
         </a>
