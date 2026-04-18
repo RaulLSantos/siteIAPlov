@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
-// use sempre o asset local (importado do src/assets)
 import logoLocal from "@/assets/logo-iap.jpg";
 
 const navItems = [
@@ -13,30 +12,13 @@ const navItems = [
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
-    // sempre usar o asset local; remover dependência de recursos remotos
     const [logoSrc, setLogoSrc] = useState<string>(logoLocal);
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
-        // Apenas logs de depuração sobre o elemento de imagem (não altera src)
         const img = imgRef.current;
         if (img) {
             console.log("[Navbar] logo src (initial):", img.src);
-            const cs = getComputedStyle(img);
-            console.log(
-                "[Navbar] computed styles - display:",
-                cs.display,
-                "width:",
-                cs.width,
-                "height:",
-                cs.height,
-                "opacity:",
-                cs.opacity,
-                "visibility:",
-                cs.visibility,
-                "object-fit:",
-                cs.objectFit
-            );
         } else {
             console.warn("[Navbar] logo img não encontrada no DOM");
         }
@@ -48,10 +30,7 @@ const Navbar = () => {
         if (id) {
             const el = document.getElementById(id);
             if (el) {
-                // Use scrollIntoView para respeitar scroll-margin-top definido em CSS
-                // Isso melhora o comportamento em mobile/tablet e preserva o desktop.
                 el.scrollIntoView({ behavior: "smooth", block: "start" });
-
                 try {
                     history.replaceState(null, "", `#${id}`);
                 } catch {
@@ -88,11 +67,8 @@ const Navbar = () => {
                                 }
                             }}
                         />
-                        {/* Mostrar o nome também em mobile/tablet:
-                            - removido o `hidden sm:inline-block`
-                            - limitar largura e truncar para não quebrar layout
-                        */}
-                        <span className="ml-2 text-sm md:text-base font-medium font-body max-w-[140px] sm:max-w-[220px] truncate">
+                        {/* Forçar exibição no mobile: inline-block + cor explícita */}
+                        <span className="inline-block ml-2 text-sm md:text-base font-medium font-body max-w-[140px] sm:max-w-[220px] truncate text-foreground">
                           Igreja Adventista da Promessa
                         </span>
                     </a>

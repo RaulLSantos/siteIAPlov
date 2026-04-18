@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -61,9 +61,23 @@
   }
 }
 
+/* Adição responsiva do offset do header para scroll-margin-top */
+:root {
+    --header-height-desktop: 80px; /* ajuste se seu header desktop for 80px */
+    --header-height-mobile: 64px;  /* ajuste se seu header mobile for 64px */
+    --scroll-offset: var(--header-height-desktop);
+}
+
+/* Mobile/tablet breakpoint: use um valor menor para compensar o header menor */
+@media (max-width: 767px) {
+    :root {
+        --scroll-offset: var(--header-height-mobile);
+    }
+}
+
 /* aplica offset para ancoragem em todos os targets com id (se preferir, use apenas #home, #sobre, etc.) */
 [id] {
-  scroll-margin-top: calc(var(--nav-height) + 0.25rem);
+    scroll-margin-top: calc(var(--scroll-offset));
 }
 
 @layer base {

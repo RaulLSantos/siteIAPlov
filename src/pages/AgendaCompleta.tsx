@@ -38,11 +38,12 @@ const AgendaCompleta = () => {
     useEffect(() => {
         const base = (import.meta as any).env?.BASE_URL ?? "/";
         const candidates = [
-            `${base}programacoes.json`,
-            `${base}public/programacoes.json`,
-            `/programacoes.json`,
-            `programacoes.json`,
-            // se precisar, outros caminhos podem ser adicionados
+            `./programacoes.json`,                 // relativo ao index.html em docs/
+            `${base}programacoes.json`,            // base-aware (Vite)
+            `/programacoes.json`,                  // host-root
+            `${base}public/programacoes.json`,    // fallback
+            `programacoes.json`,                   // relativo à pasta corrente
+            `/siteIAPlov/programacoes.json`,       // GitHub Pages subpath explícito
         ];
 
         const fetchFirstAvailable = async () => {
