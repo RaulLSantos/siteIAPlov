@@ -79,8 +79,12 @@ const Navbar = () => {
                 const navHeight = nav ? (nav as HTMLElement).offsetHeight : 0;
                 const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
                 window.scrollTo({ top, behavior: "smooth" });
-                // atualiza hash sem pular instantaneamente
-                history.replaceState(null, "", `#${id}`);
+
+                try {
+                    history.replaceState(null, "", `#${id}`);
+                } catch {
+                    window.location.hash = `#${id}`;
+                }
             } else {
                 window.location.hash = href;
             }
