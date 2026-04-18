@@ -1,10 +1,7 @@
-﻿import { useState, useEffect, useRef, type MouseEvent } from "react";
+import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
-// fallback de build: import do asset presente no projeto (igual Footer)
+// use sempre o asset local (importado do src/assets)
 import logoLocal from "@/assets/logo-iap.jpg";
-
-// caminho público em docs (fallback remoto)
-const remotePath = "lovable-uploads/336e7ed0-418d-4f4e-98c8-89cf8a22fa62.png";
 
 const navItems = [
     { label: "Home", href: "#home" },
@@ -16,35 +13,12 @@ const navItems = [
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
+    // sempre usar o asset local; remover dependência de recursos remotos
     const [logoSrc, setLogoSrc] = useState<string>(logoLocal);
     const imgRef = useRef<HTMLImageElement | null>(null);
 
     useEffect(() => {
-        // resolve o caminho DO LADO DO CLIENTE usando import.meta.env.BASE_URL ou document.baseURI
-        const candidate = (() => {
-            try {
-                // document.baseURI respeita o <base href="...">
-                return new URL(remotePath, document.baseURI).href;
-            } catch {
-                // fallback: usar import.meta.env.BASE_URL (pode estar incorreto em alguns cenários)
-                return `${import.meta.env.BASE_URL ?? ""}${remotePath}`;
-            }
-        })();
-
-        // Verifica existência com HEAD antes de trocar a src para evitar 404 visível
-        fetch(candidate, { method: "HEAD" })
-            .then((res) => {
-                if (res.ok) {
-                    setLogoSrc(candidate);
-                } else {
-                    console.warn("[Navbar] logo remoto não disponível:", candidate, "status:", res.status);
-                }
-            })
-            .catch((err) => {
-                console.warn("[Navbar] falha ao verificar logo remoto:", err);
-            });
-
-        // Log de depuração: mostra a src no runtime e estilos computados
+        // Apenas logs de depuração sobre o elemento de imagem (não altera src)
         const img = imgRef.current;
         if (img) {
             console.log("[Navbar] logo src (initial):", img.src);
@@ -74,7 +48,6 @@ const Navbar = () => {
         if (id) {
             const el = document.getElementById(id);
             if (el) {
-                // calcula offset do topo para compensar o navbar fixo
                 const nav = document.querySelector("nav");
                 const navHeight = nav ? (nav as HTMLElement).offsetHeight : 0;
                 const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
@@ -116,13 +89,11 @@ const Navbar = () => {
                                 }
                             }}
                         />
-                        {/* Nome da igreja junto ao logo */}
                         <span className="hidden sm:inline-block ml-2 text-sm md:text-base font-medium font-body">
                           Igreja Adventista da Promessa
                         </span>
                     </a>
 
-                    {/* Desktop */}
                     <ul className="hidden md:flex items-center gap-8">
                         {navItems.map((item) => (
                             <li key={item.href}>
@@ -137,7 +108,6 @@ const Navbar = () => {
                         ))}
                     </ul>
 
-                    {/* Mobile toggle */}
                     <button
                         onClick={() => setOpen(!open)}
                         className="md:hidden text-foreground p-2"
@@ -147,7 +117,6 @@ const Navbar = () => {
                     </button>
                 </div>
 
-                {/* Mobile menu */}
                 {open && (
                     <div className="md:hidden bg-card border-t border-border">
                         <ul className="flex flex-col py-4">
@@ -167,7 +136,6 @@ const Navbar = () => {
                 )}
             </nav>
 
-            {/* Spacer para que conteúdo não fique sob o nav fixo */}
             <div className="h-16 md:h-20" aria-hidden="true" />
         </>
     );
