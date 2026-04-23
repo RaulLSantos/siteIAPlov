@@ -10,9 +10,12 @@ import AgendaCompleta from "./pages/AgendaCompleta";
 
 const queryClient = new QueryClient();
 
-const basename = import.meta.env.PROD ? "/siteIAPlov" : "/";
+// Use BASE_URL gerado pelo Vite (garante que coincide com `base` do vite.config)
+const basename = import.meta.env.BASE_URL || "/";
 
 const App = () => {
+    console.log("[app] render start", { basename });
+
     // Detecta hash na inicialização (minimiza runtime checks)
     const isHashAgenda = useMemo(() => {
         try {
