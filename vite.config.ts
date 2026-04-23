@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    outDir: "dist",
+    // GitHub Pages is configured to publish the /docs folder.
+    outDir: "docs",
     sourcemap: mode === "development",
     emptyOutDir: true,
   },
