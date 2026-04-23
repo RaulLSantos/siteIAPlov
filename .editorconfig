@@ -1,4 +1,4 @@
-﻿root = true
+root = true
 
 [*]
 charset = utf-8
@@ -19,4 +19,4 @@ indent_size = 2
 
 [*.{ts,tsx}]
 # Prefer explicit semicolons and double quotes in the project code style
-# Note: editorconfig does not enforce quotes/semicolons at runtime; linters should be used for that.
+# Note: editorconfig does not enforce quotes/semicolons at runtime; linters should be used for that
