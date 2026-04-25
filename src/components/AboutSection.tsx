@@ -1,4 +1,4 @@
-﻿import { BookOpen, Eye, Heart } from "lucide-react";
+import { BookOpen, Eye, Heart } from "lucide-react";
 
 const values = [
     { icon: BookOpen, title: "Missão", text: "Nossa missão é adorar a Deus, proclamar a Jesus Cristo e fazer discípulos no poder do Espírito Santo." },
@@ -16,7 +16,7 @@ const AboutSection = () => {
             Conheça a Igreja da Promessa
           </h2>
           <p className="text-muted-foreground font-body text-lg leading-relaxed">
-            A Igreja da Promessa é uma comunidade cristã evangélica em Cascavel - PR, fundada no Brasil, com raízes na pregação da Palavra de Deus e na busca pelo batismo com o Espírito Santo. Há décadas, temos o privilégio de acolher famílias, jovens e crianças, compartilhando a esperança que encontramos em Jesus Cristo.
+            A Igreja da Promessa é uma comunidade cristã evangélica, fundada em 24 de janeiro de 1932, com raízes na pregação da Palavra de Deus e na busca pelo batismo com o Espírito Santo. Há décadas, temos o privilégio de acolher famílias, jovens e crianças, compartilhando a esperança que encontramos em Jesus Cristo.
           </p>
           <p className="text-muted-foreground font-body text-lg leading-relaxed mt-4">
             Nossos cultos são momentos de adoração genuína, ensino bíblico e comunhão fraterna. Se você procura uma igreja em Cascavel onde possa crescer espiritualmente e encontrar uma família em Cristo, a IAP Cascavel está de braços abertos para recebê-lo.

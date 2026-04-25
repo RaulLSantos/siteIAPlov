@@ -10,7 +10,7 @@ const ContactSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-accent font-body text-sm tracking-[0.2em] uppercase font-semibold mb-3">Contato</p>
           <h2 className="text-foreground font-display text-3xl md:text-5xl font-bold mb-6">
-            Visite a Igreja da Promessa em Cascavel
+            Visite nossa Igreja
           </h2>
           <p className="text-muted-foreground font-body text-lg">
             Estamos prontos para receber você. Entre em contato pelo WhatsApp ou visite-nos pessoalmente no Centro de Cascavel.

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Clock, CalendarDays, Star } from "lucide-react";
 
 const regularSchedule = [
@@ -119,7 +119,7 @@ const ScheduleSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-accent font-body text-sm tracking-[0.2em] uppercase font-semibold mb-3">Agenda</p>
           <h2 className="text-foreground font-display text-3xl md:text-5xl font-bold mb-6">
-            Horários e programações da Igreja da Promessa
+            Horários e programações
           </h2>
           <p className="text-muted-foreground font-body text-lg">
             Venha participar dos nossos cultos e eventos em Cascavel. Há sempre um horário esperando por você!
