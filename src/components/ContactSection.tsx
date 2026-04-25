@@ -10,17 +10,17 @@ const ContactSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-accent font-body text-sm tracking-[0.2em] uppercase font-semibold mb-3">Contato</p>
           <h2 className="text-foreground font-display text-3xl md:text-5xl font-bold mb-6">
-            Fale conosco
+            Visite a Igreja da Promessa em Cascavel
           </h2>
           <p className="text-muted-foreground font-body text-lg">
-            Estamos prontos para receber você. Entre em contato pelo WhatsApp ou visite-nos pessoalmente!
+            Estamos prontos para receber você. Entre em contato pelo WhatsApp ou visite-nos pessoalmente no Centro de Cascavel.
           </p>
         </div>
 
         {/* Main WhatsApp CTA */}
         <div className="text-center mb-12">
           <Button variant="whatsapp" size="lg" className="text-base px-10 py-6 h-auto" asChild>
-            <a href={`${WHATSAPP_URL}?text=${encodeURIComponent("Olá! Gostaria de mais informações sobre a igreja.")}`} target="_blank" rel="noopener noreferrer">
+            <a href={`${WHATSAPP_URL}?text=${encodeURIComponent("Olá! Gostaria de mais informações sobre a Igreja da Promessa.")}`} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="mr-2" size={22} /> Fale pelo WhatsApp
             </a>
           </Button>

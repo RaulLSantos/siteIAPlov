@@ -57,7 +57,7 @@ const Navbar = () => {
                         <img
                             ref={imgRef}
                             src={logoSrc}
-                            alt="Logotipo"
+                            alt="Logotipo Igreja da Promessa"
                             className="h-10 md:h-14 w-auto object-contain"
                             onError={(ev) => {
                                 const img = ev.currentTarget as HTMLImageElement;
@@ -69,7 +69,7 @@ const Navbar = () => {
                         />
                         {/* Forçar exibição no mobile: inline-block + cor explícita */}
                         <span className="inline-block ml-2 text-sm md:text-base font-medium font-body max-w-[140px] sm:max-w-[220px] truncate text-foreground">
-                          Igreja Adventista da Promessa
+                          Igreja da Promessa
                         </span>
                     </a>
 

@@ -25,10 +25,10 @@ const MinistriesSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-accent font-body text-sm tracking-[0.2em] uppercase font-semibold mb-3">Ministérios</p>
           <h2 className="text-foreground font-display text-3xl md:text-5xl font-bold mb-6">
-            Encontre seu lugar na comunidade
+            Encontre seu lugar na comunidade da Igreja da Promessa
           </h2>
           <p className="text-muted-foreground font-body text-lg">
-            Temos ministérios para todas as idades e momentos da vida. Cada um é uma oportunidade de servir, crescer e se conectar.
+            Temos ministérios para todas as idades e momentos da vida em Cascavel. Cada um é uma oportunidade de servir, crescer e se conectar.
           </p>
         </div>
 

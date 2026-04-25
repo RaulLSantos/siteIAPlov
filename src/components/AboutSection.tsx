@@ -13,13 +13,13 @@ const AboutSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <p className="text-accent font-body text-sm tracking-[0.2em] uppercase font-semibold mb-3">Sobre nós</p>
           <h2 className="text-foreground font-display text-3xl md:text-5xl font-bold mb-6">
-            Conheça a Igreja Adventista da Promessa
+            Conheça a Igreja da Promessa
           </h2>
           <p className="text-muted-foreground font-body text-lg leading-relaxed">
-            A Igreja Adventista da Promessa é uma comunidade cristã evangélica fundada no Brasil, com raízes na pregação da Palavra de Deus e na busca pelo batismo com o Espírito Santo. Há décadas, temos o privilégio de acolher famílias, jovens e crianças, compartilhando a esperança que encontramos em Jesus Cristo.
+            A Igreja da Promessa é uma comunidade cristã evangélica em Cascavel - PR, fundada no Brasil, com raízes na pregação da Palavra de Deus e na busca pelo batismo com o Espírito Santo. Há décadas, temos o privilégio de acolher famílias, jovens e crianças, compartilhando a esperança que encontramos em Jesus Cristo.
           </p>
           <p className="text-muted-foreground font-body text-lg leading-relaxed mt-4">
-            Nossos cultos são momentos de adoração genuína, ensino bíblico e comunhão fraterna. Se você busca um lugar onde possa crescer espiritualmente e encontrar uma família em Cristo, nossos braços estão abertos para recebê-lo.
+            Nossos cultos são momentos de adoração genuína, ensino bíblico e comunhão fraterna. Se você procura uma igreja em Cascavel onde possa crescer espiritualmente e encontrar uma família em Cristo, a IAP Cascavel está de braços abertos para recebê-lo.
           </p>
         </div>
 

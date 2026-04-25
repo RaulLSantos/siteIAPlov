@@ -17,19 +17,19 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 container text-center px-4 pt-20 pb-12">
         <p className="text-gold-light font-body text-sm md:text-base tracking-[0.25em] uppercase mb-4 animate-fade-in-up">
-          Igreja Adventista da Promessa
+          IAP Cascavel
         </p>
         <h1 className="text-primary-foreground font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-          Você é bem-vindo aqui
+          Igreja da Promessa
         </h1>
         <p className="text-primary-foreground/85 font-body text-lg md:text-xl max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          Um lugar para encontrar fé, esperança e comunidade. Venha como você está — Deus tem um plano para sua vida.
+          Uma igreja para encontrar fé, esperança, ensino bíblico e comunhão. Venha como você está - Deus tem um plano para sua vida.
         </p>
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.45s" }}>
           <Button variant="hero" size="lg" asChild>
-            <a href={`${WHATSAPP_URL}?text=${encodeURIComponent("Olá! Quero conhecer a igreja.")}`} target="_blank" rel="noopener noreferrer">
+            <a href={`${WHATSAPP_URL}?text=${encodeURIComponent("Olá! Quero conhecer a Igreja da Promessa.")}`} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="mr-2" size={18} /> Quero conhecer a igreja
             </a>
           </Button>

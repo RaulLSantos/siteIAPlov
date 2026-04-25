@@ -128,7 +128,7 @@ const AgendaCompleta = () => {
         <main className="min-h-screen bg-background py-12">
             <div className="container px-4">
                 <div className="max-w-3xl mx-auto text-center mb-10">
-                    <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground">Agenda Completa</h1>
+                    <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground">Agenda da Igreja da Promessa</h1>
                     <p className="text-muted-foreground mt-2">
                         Todas as programações carregadas do arquivo interno. Acesso restrito por link direto.
                     </p>
