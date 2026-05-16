@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://promessacentralcascavel.net.br/sitemap.xml
+Sitemap: https://promessacascavel.com.br/sitemap.xml

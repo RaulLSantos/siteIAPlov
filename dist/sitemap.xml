@@ -4,12 +4,12 @@
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
 >
   <url>
-    <loc>https://promessacentralcascavel.net.br/</loc>
-    <lastmod>2026-04-25</lastmod>
+    <loc>https://promessacascavel.com.br/</loc>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://promessacentralcascavel.net.br/og-image.png</image:loc>
+      <image:loc>https://promessacascavel.com.br/og-image.png</image:loc>
       <image:title>Igreja da Promessa em Cascavel</image:title>
     </image:image>
   </url>
