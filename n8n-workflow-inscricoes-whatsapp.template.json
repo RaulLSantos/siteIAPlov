@@ -1,0 +1,604 @@
+{
+  "name": "Inscricoes Google Sheets -> WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "COLE_AQUI_O_ID_DA_PLANILHA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "COLE_AQUI_O_NOME_DA_ABA"
+        },
+        "event": "anyUpdate",
+        "includeInOutput": "new",
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRange",
+              "headerRow": 1,
+              "firstDataRow": 2
+            }
+          }
+        }
+      },
+      "id": "google-sheets-trigger",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        20
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "COLE_AQUI_ID_CREDENCIAL_GOOGLE_TRIGGER",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const status = String($json.status || '').trim();\nconst statusLower = status.toLowerCase();\nconst inicialEnviada = String($json.mensagem_inicial_enviada || '').trim().toLowerCase() === 'sim';\nconst confirmacaoEnviada = String($json.confirmacao_enviada || '').trim().toLowerCase() === 'sim';\nconst whatsapp = String($json.whatsapp_normalizado || '').replace(/\\D/g, '');\nconst whatsappValido = /^55\\d{10,11}$/.test(whatsapp);\nconst now = new Date().toISOString();\nconst nome = String($json.nome || '').trim();\nconst evento = String($json.evento || '').trim();\nconst mensagemInicialTemplate = 'Olá, {{nome}}! Recebemos sua inscrição para o evento {{evento}}. Em breve enviaremos mais informações.';\nconst mensagemConfirmacaoTemplate = 'Olá, {{nome}}! Sua inscrição no evento {{evento}} foi confirmada com sucesso.';\nconst render = (template) => template.replaceAll('{{nome}}', nome).replaceAll('{{evento}}', evento);\nlet route = 'ignorar';\nlet messageType = '';\nlet message = '';\nlet error = '';\nif (!whatsappValido && ['nova inscrição', 'concluído', 'pagamento feito'].includes(statusLower)) {\n  route = 'erro_whatsapp';\n  error = 'WhatsApp vazio ou inválido';\n} else if (statusLower === 'nova inscrição' && !inicialEnviada) {\n  route = 'mensagem_inicial';\n  messageType = 'inicial';\n  message = render(mensagemInicialTemplate);\n} else if ((statusLower === 'concluído' || statusLower === 'pagamento feito') && !confirmacaoEnviada) {\n  route = 'confirmacao';\n  messageType = 'confirmacao';\n  message = render(mensagemConfirmacaoTemplate);\n}\nreturn {\n  json: {\n    ...$json,\n    status_normalizado: status,\n    route,\n    messageType,\n    whatsapp_destino: whatsapp,\n    mensagem_whatsapp: message,\n    erro_processamento: error,\n    processedAt: now\n  }\n};"
+      },
+      "id": "normalizar-e-rotear",
+      "name": "Normalizar dados e decidir rota",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "mensagem_inicial",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Mensagem inicial"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "confirmacao",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Confirmação"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "erro_whatsapp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Erro WhatsApp"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Ignorar"
+        }
+      },
+      "id": "switch-rota",
+      "name": "Switch por rota",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -300,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "COLE_AQUI_ENDPOINT_WHATSAPP",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer COLE_AQUI_TOKEN_WHATSAPP"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.whatsapp_destino }}\",\n  \"message\": \"{{ $json.mensagem_whatsapp }}\",\n  \"name\": \"{{ $json.nome }}\",\n  \"event\": \"{{ $json.evento }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": false,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "enviar-whatsapp-inicial",
+      "name": "Enviar WhatsApp inicial",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        -180
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "COLE_AQUI_ENDPOINT_WHATSAPP",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer COLE_AQUI_TOKEN_WHATSAPP"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.whatsapp_destino }}\",\n  \"message\": \"{{ $json.mensagem_whatsapp }}\",\n  \"name\": \"{{ $json.nome }}\",\n  \"event\": \"{{ $json.evento }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": false,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "enviar-whatsapp-confirmacao",
+      "name": "Enviar WhatsApp confirmação",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        20
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error ? 'erro' : 'ok' }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-envio-inicial-ok",
+      "name": "Envio inicial OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        260,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error ? 'erro' : 'ok' }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-confirmacao-ok",
+      "name": "Envio confirmação OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        260,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "COLE_AQUI_O_ID_DA_PLANILHA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "COLE_AQUI_O_NOME_DA_ABA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $('Normalizar dados e decidir rota').item.json.row_number || $('Normalizar dados e decidir rota').item.json.rowNumber || $('Normalizar dados e decidir rota').item.json['row number'] }}",
+            "mensagem_inicial_enviada": "Sim",
+            "data_mensagem_inicial": "={{ $now.toISO() }}",
+            "data_ultimo_processamento": "={{ $now.toISO() }}",
+            "erro_envio": ""
+          }
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "marcar-inicial-enviada",
+      "name": "Marcar inicial enviada",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        -260
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "COLE_AQUI_ID_CREDENCIAL_GOOGLE_SHEETS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "COLE_AQUI_O_ID_DA_PLANILHA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "COLE_AQUI_O_NOME_DA_ABA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $('Normalizar dados e decidir rota').item.json.row_number || $('Normalizar dados e decidir rota').item.json.rowNumber || $('Normalizar dados e decidir rota').item.json['row number'] }}",
+            "confirmacao_enviada": "Sim",
+            "data_confirmacao": "={{ $now.toISO() }}",
+            "data_ultimo_processamento": "={{ $now.toISO() }}",
+            "erro_envio": ""
+          }
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "marcar-confirmacao-enviada",
+      "name": "Marcar confirmação enviada",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        -20
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "COLE_AQUI_ID_CREDENCIAL_GOOGLE_SHEETS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "COLE_AQUI_O_ID_DA_PLANILHA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "COLE_AQUI_O_NOME_DA_ABA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $('Normalizar dados e decidir rota').item.json.row_number || $('Normalizar dados e decidir rota').item.json.rowNumber || $('Normalizar dados e decidir rota').item.json['row number'] }}",
+            "erro_envio": "={{ $json.error?.message || $json.erro_processamento || 'Erro ao enviar WhatsApp' }}",
+            "data_ultimo_processamento": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "registrar-erro-envio",
+      "name": "Registrar erro de envio",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        220
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "COLE_AQUI_ID_CREDENCIAL_GOOGLE_SHEETS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "COLE_AQUI_O_ID_DA_PLANILHA"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "COLE_AQUI_O_NOME_DA_ABA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "value": {
+            "row_number": "={{ $('Normalizar dados e decidir rota').item.json.row_number || $('Normalizar dados e decidir rota').item.json.rowNumber || $('Normalizar dados e decidir rota').item.json['row number'] }}",
+            "data_ultimo_processamento": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "marcar-processado-sem-envio",
+      "name": "Marcar processado sem envio",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "COLE_AQUI_ID_CREDENCIAL_GOOGLE_SHEETS",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalizar dados e decidir rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar dados e decidir rota": {
+      "main": [
+        [
+          {
+            "node": "Switch por rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch por rota": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp inicial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar WhatsApp confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar erro de envio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar processado sem envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp inicial": {
+      "main": [
+        [
+          {
+            "node": "Envio inicial OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp confirmação": {
+      "main": [
+        [
+          {
+            "node": "Envio confirmação OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envio inicial OK?": {
+      "main": [
+        [
+          {
+            "node": "Marcar inicial enviada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar erro de envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envio confirmação OK?": {
+      "main": [
+        [
+          {
+            "node": "Marcar confirmação enviada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar erro de envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-05-24T00:00:00.000Z",
+  "versionId": "template"
+}

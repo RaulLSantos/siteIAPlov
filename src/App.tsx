@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AgendaCompleta from "./pages/AgendaCompleta";
+import Inscricoes from "./pages/Inscricoes";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => {
                         <Routes>
                             <Route path="/" element={<Index />} />
                             <Route path="/agendacompleta" element={<AgendaCompleta />} />
+                            <Route path="/inscricoes.html" element={<Inscricoes />} />
                             <Route path="*" element={<NotFound />} />
                         </Routes>
                     </Router>

@@ -29,5 +29,11 @@ export default defineConfig(({ mode }) => ({
     outDir: "docs",
     sourcemap: mode === "development",
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        inscricoes: path.resolve(__dirname, "inscricoes.html"),
+      },
+    },
   },
 }));

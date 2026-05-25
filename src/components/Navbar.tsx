@@ -7,6 +7,7 @@ const navItems = [
     { label: "Sobre", href: "#sobre" },
     { label: "Ministérios", href: "#ministerios" },
     { label: "Agenda", href: "#agenda" },
+    { label: "Evento", href: "inscricoes.html" },
     { label: "Contato", href: "#contato" },
 ];
 
@@ -26,6 +27,8 @@ const Navbar = () => {
 
     const handleNavigate = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
         e.preventDefault();
+        const base = import.meta.env.BASE_URL || "/";
+        const pageUrl = (path: string) => `${base}${path.replace(/^\//, "")}`;
         const id = href.startsWith("#") ? href.slice(1) : null;
         if (id) {
             const el = document.getElementById(id);
@@ -37,10 +40,10 @@ const Navbar = () => {
                     window.location.hash = `#${id}`;
                 }
             } else {
-                window.location.hash = href;
+                window.location.href = pageUrl(href);
             }
         } else {
-            window.location.href = href;
+            window.location.href = pageUrl(href);
         }
         setOpen(false);
     };
@@ -73,13 +76,13 @@ const Navbar = () => {
                         </span>
                     </a>
 
-                    <ul className="hidden md:flex items-center gap-8">
+                    <ul className="hidden md:flex items-center gap-5 lg:gap-8">
                         {navItems.map((item) => (
                             <li key={item.href}>
                                 <a
                                     href={item.href}
                                     onClick={(e) => handleNavigate(e, item.href)}
-                                    className="text-foreground/80 hover:text-primary font-medium transition-colors text-sm tracking-wide uppercase font-body"
+                                    className="text-foreground/80 hover:text-primary font-medium transition-colors text-xs lg:text-sm tracking-wide uppercase font-body"
                                 >
                                     {item.label}
                                 </a>
