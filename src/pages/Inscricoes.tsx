@@ -1,53 +1,56 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useState } from "react";
 import { AlertCircle, CheckCircle2, HeartHandshake, Loader2, Mail, Phone, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createInscricaoPayload, formatWhatsapp, validateInscricao } from "@/lib/inscricao";
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz9jiwq1mcWwJFZLdWvK4REBqIQMAmyEnDMsuYNi_-aKBCjzBtbtGWufPgX8GuUKI_wSQ/exec";
 
-const digitsOnly = (value: string) => value.replace(/\D/g, "");
-
-const localWhatsappDigits = (value: string) => {
-  const digits = digitsOnly(value);
-
-  if (digits.startsWith("55") && digits.length > 11) {
-    return digits.slice(2, 13);
-  }
-
-  return digits.slice(0, 11);
-};
-
-const normalizedBrazilWhatsapp = (value: string) => {
-  const localDigits = localWhatsappDigits(value);
-  return localDigits.length === 11 ? `55${localDigits}` : localDigits;
-};
-
-const formatWhatsapp = (value: string) => {
-  const digits = localWhatsappDigits(value);
-  const ddd = digits.slice(0, 2);
-  const firstPart = digits.slice(2, 7);
-  const secondPart = digits.slice(7, 11);
-
-  if (digits.length <= 2) {
-    return ddd ? `(${ddd}` : "";
-  }
-
-  if (digits.length <= 7) {
-    return `(${ddd}) ${firstPart}`;
-  }
-
-  return `(${ddd}) ${firstPart}-${secondPart}`;
-};
-
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
   mensagem?: string;
-  source?: string;
 }
+
+const submitInscricaoJsonp = (payload: Record<string, string>) =>
+  new Promise<ScriptResponse>((resolve, reject) => {
+    const callbackName = `inscricaoCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const url = new URL(SCRIPT_URL);
+
+    Object.entries(payload).forEach(([key, value]) => url.searchParams.set(key, value));
+    url.searchParams.set("callback", callbackName);
+
+    const script = document.createElement("script");
+    let timeoutId: number | null = null;
+
+    const cleanup = () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      script.remove();
+      delete (window as any)[callbackName];
+    };
+
+    (window as any)[callbackName] = (response: ScriptResponse) => {
+      cleanup();
+      resolve(response);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Falha ao carregar resposta do Apps Script."));
+    };
+
+    timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Tempo limite ao aguardar resposta do Apps Script."));
+    }, 15000);
+
+    script.src = url.toString();
+    script.async = true;
+    document.body.appendChild(script);
+  });
 
 const Inscricoes = () => {
   const [nome, setNome] = useState("");
@@ -55,22 +58,30 @@ const Inscricoes = () => {
   const [whatsapp, setWhatsapp] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate" | "possibleDuplicate" | "error">("idle");
   const [message, setMessage] = useState("");
-  const formRef = useRef<HTMLFormElement | null>(null);
-  const timeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent<ScriptResponse>) => {
-      const resultado = event.data;
+  const resetFeedback = () => {
+    if (status !== "idle" && status !== "sending") {
+      setStatus("idle");
+      setMessage("");
+    }
+  };
 
-      if (!resultado || resultado.source !== "encontro-casais-inscricao") {
-        return;
-      }
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
+    const validation = validateInscricao({ nome, email, whatsapp });
 
+    if (!validation.valid) {
+      setMessage(validation.message || "Preencha nome, e-mail e WhatsApp corretamente.");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("sending");
+    setMessage("");
+
+    try {
+      const resultado = await submitInscricaoJsonp(createInscricaoPayload({ nome, email, whatsapp }));
       const mensagem = resultado.mensagem || "Erro ao enviar inscricao.";
 
       if (resultado.status === "sucesso") {
@@ -96,43 +107,11 @@ const Inscricoes = () => {
 
       setMessage(mensagem);
       setStatus("error");
-    };
-
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  const resetFeedback = () => {
-    if (status !== "idle" && status !== "sending") {
-      setStatus("idle");
-      setMessage("");
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const whatsappNormalizado = normalizedBrazilWhatsapp(whatsapp);
-
-    if (!nome.trim() || !email.trim() || localWhatsappDigits(whatsapp).length !== 11) {
-      setMessage("Preencha nome, e-mail e WhatsApp corretamente.");
-      setStatus("error");
-      return;
-    }
-
-    setStatus("sending");
-    setMessage("");
-
-    formRef.current?.submit();
-
-    timeoutRef.current = window.setTimeout(() => {
+    } catch (error) {
+      console.error(error);
       setMessage("Nao foi possivel enviar a inscricao. Tente novamente em instantes.");
       setStatus("error");
-    }, 15000);
+    }
   };
 
   return (
@@ -163,19 +142,7 @@ const Inscricoes = () => {
               </div>
 
               <div className="rounded-lg border border-border/70 bg-card p-6 shadow-sm md:p-8">
-                <iframe className="hidden" name="inscricao-response" title="Resposta da inscricao" />
-                <form
-                  ref={formRef}
-                  id="form-inscricao"
-                  className="space-y-5"
-                  method="POST"
-                  action={SCRIPT_URL}
-                  target="inscricao-response"
-                  onSubmit={handleSubmit}
-                >
-                  <input type="hidden" name="whatsappNumeros" value={normalizedBrazilWhatsapp(whatsapp)} />
-                  <input type="hidden" name="evento" value="Encontro de Casais" />
-                  <input type="hidden" name="origem" value="Site" />
+                <form id="form-inscricao" className="space-y-5" onSubmit={handleSubmit}>
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome completo *</Label>
                     <div className="relative">
