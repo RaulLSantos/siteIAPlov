@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, HeartHandshake, Loader2, Mail, Phone, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -46,6 +46,7 @@ const formatWhatsapp = (value: string) => {
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
   mensagem?: string;
+  source?: string;
 }
 
 const Inscricoes = () => {
@@ -54,43 +55,22 @@ const Inscricoes = () => {
   const [whatsapp, setWhatsapp] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate" | "possibleDuplicate" | "error">("idle");
   const [message, setMessage] = useState("");
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
-  const resetFeedback = () => {
-    if (status !== "idle" && status !== "sending") {
-      setStatus("idle");
-      setMessage("");
-    }
-  };
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent<ScriptResponse>) => {
+      const resultado = event.data;
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+      if (!resultado || resultado.source !== "encontro-casais-inscricao") {
+        return;
+      }
 
-    const whatsappNormalizado = normalizedBrazilWhatsapp(whatsapp);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
 
-    if (!nome.trim() || !email.trim() || localWhatsappDigits(whatsapp).length !== 11) {
-      setMessage("Preencha nome, e-mail e WhatsApp corretamente.");
-      setStatus("error");
-      return;
-    }
-
-    setStatus("sending");
-    setMessage("");
-
-    const formData = new URLSearchParams();
-    formData.set("nome", nome.trim());
-    formData.set("email", email.trim());
-    formData.set("whatsapp", whatsapp.trim());
-    formData.set("whatsappNumeros", whatsappNormalizado);
-    formData.set("evento", "Encontro de Casais");
-    formData.set("origem", "Site");
-
-    try {
-      const response = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: formData,
-      });
-
-      const resultado = (await response.json()) as ScriptResponse;
       const mensagem = resultado.mensagem || "Erro ao enviar inscricao.";
 
       if (resultado.status === "sucesso") {
@@ -116,11 +96,43 @@ const Inscricoes = () => {
 
       setMessage(mensagem);
       setStatus("error");
-    } catch (error) {
-      console.error(error);
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const resetFeedback = () => {
+    if (status !== "idle" && status !== "sending") {
+      setStatus("idle");
+      setMessage("");
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const whatsappNormalizado = normalizedBrazilWhatsapp(whatsapp);
+
+    if (!nome.trim() || !email.trim() || localWhatsappDigits(whatsapp).length !== 11) {
+      setMessage("Preencha nome, e-mail e WhatsApp corretamente.");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("sending");
+    setMessage("");
+
+    formRef.current?.submit();
+
+    timeoutRef.current = window.setTimeout(() => {
       setMessage("Nao foi possivel enviar a inscricao. Tente novamente em instantes.");
       setStatus("error");
-    }
+    }, 15000);
   };
 
   return (
@@ -151,7 +163,19 @@ const Inscricoes = () => {
               </div>
 
               <div className="rounded-lg border border-border/70 bg-card p-6 shadow-sm md:p-8">
-                <form id="form-inscricao" className="space-y-5" onSubmit={handleSubmit}>
+                <iframe className="hidden" name="inscricao-response" title="Resposta da inscricao" />
+                <form
+                  ref={formRef}
+                  id="form-inscricao"
+                  className="space-y-5"
+                  method="POST"
+                  action={SCRIPT_URL}
+                  target="inscricao-response"
+                  onSubmit={handleSubmit}
+                >
+                  <input type="hidden" name="whatsappNumeros" value={normalizedBrazilWhatsapp(whatsapp)} />
+                  <input type="hidden" name="evento" value="Encontro de Casais" />
+                  <input type="hidden" name="origem" value="Site" />
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome completo *</Label>
                     <div className="relative">
