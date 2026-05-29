@@ -1,59 +1,43 @@
-import { FormEvent, useState } from "react";
-import { AlertCircle, CheckCircle2, HeartHandshake, Loader2, Mail, Phone, User } from "lucide-react";
+import { FormEvent, useRef, useState } from "react";
+import { AlertCircle, CheckCircle2, HeartHandshake, Image, Loader2, Mail, Phone, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  ACCEPTED_PHOTO_TYPES,
+  createInscricaoPayload,
+  formatWhatsapp,
+  localWhatsappDigits,
+  normalizedBrazilWhatsapp,
+  validatePhotoFile,
+} from "@/lib/inscricao";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbz9jiwq1mcWwJFZLdWvK4REBqIQMAmyEnDMsuYNi_-aKBCjzBtbtGWufPgX8GuUKI_wSQ/exec";
-
-const digitsOnly = (value: string) => value.replace(/\D/g, "");
-
-const localWhatsappDigits = (value: string) => {
-  const digits = digitsOnly(value);
-
-  if (digits.startsWith("55") && digits.length > 11) {
-    return digits.slice(2, 13);
-  }
-
-  return digits.slice(0, 11);
-};
-
-const normalizedBrazilWhatsapp = (value: string) => {
-  const localDigits = localWhatsappDigits(value);
-  return localDigits.length === 11 ? `55${localDigits}` : localDigits;
-};
-
-const formatWhatsapp = (value: string) => {
-  const digits = localWhatsappDigits(value);
-  const ddd = digits.slice(0, 2);
-  const firstPart = digits.slice(2, 7);
-  const secondPart = digits.slice(7, 11);
-
-  if (digits.length <= 2) {
-    return ddd ? `(${ddd}` : "";
-  }
-
-  if (digits.length <= 7) {
-    return `(${ddd}) ${firstPart}`;
-  }
-
-  return `(${ddd}) ${firstPart}-${secondPart}`;
-};
+  "https://script.google.com/macros/s/AKfycbxs87IkI862Lpt3NdcpjQMUqrHoT7g9e0xHVGejs4W5wlu-0AgXZkKRURhvJZ8SZ4C_0A/exec";
 
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
   mensagem?: string;
 }
 
+const fileToDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Nao foi possivel ler a foto selecionada."));
+    reader.readAsDataURL(file);
+  });
+
 const Inscricoes = () => {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate" | "possibleDuplicate" | "error">("idle");
   const [message, setMessage] = useState("");
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const resetFeedback = () => {
     if (status !== "idle" && status !== "sending") {
@@ -73,18 +57,37 @@ const Inscricoes = () => {
       return;
     }
 
+    const photoValidation = validatePhotoFile(foto);
+
+    if (!photoValidation.valid) {
+      setMessage(photoValidation.message || "Revise a foto selecionada.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("sending");
     setMessage("");
 
-    const formData = new URLSearchParams();
-    formData.set("nome", nome.trim());
-    formData.set("email", email.trim());
-    formData.set("whatsapp", whatsapp.trim());
-    formData.set("whatsappNumeros", whatsappNormalizado);
-    formData.set("evento", "Encontro de Casais");
-    formData.set("origem", "Site");
-
     try {
+      const fotoPayload = foto
+        ? {
+            dataUrl: await fileToDataUrl(foto),
+            name: foto.name,
+            type: foto.type,
+          }
+        : null;
+      const payload = createInscricaoPayload({ nome, email, whatsapp }, fotoPayload);
+      const formData = new URLSearchParams();
+
+      Object.entries({
+        ...payload,
+        whatsappNumeros: whatsappNormalizado,
+      }).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.set(key, value);
+        }
+      });
+
       const response = await fetch(SCRIPT_URL, {
         method: "POST",
         body: formData,
@@ -99,6 +102,10 @@ const Inscricoes = () => {
         setNome("");
         setEmail("");
         setWhatsapp("");
+        setFoto(null);
+        if (photoInputRef.current) {
+          photoInputRef.current.value = "";
+        }
         return;
       }
 
@@ -212,6 +219,44 @@ const Inscricoes = () => {
                         required
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="foto">Foto do casal</Label>
+                    <div className="relative">
+                      <Image className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        ref={photoInputRef}
+                        id="foto"
+                        name="foto"
+                        type="file"
+                        accept={ACCEPTED_PHOTO_TYPES.join(",")}
+                        className="pl-10"
+                        onChange={(event) => {
+                          const selectedFile = event.target.files?.[0] || null;
+                          const validation = validatePhotoFile(selectedFile);
+
+                          if (!validation.valid) {
+                            setFoto(null);
+                            event.target.value = "";
+                            setMessage(validation.message || "Revise a foto selecionada.");
+                            setStatus("error");
+                            return;
+                          }
+
+                          setFoto(selectedFile);
+                          resetFeedback();
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Opcional. Envie JPG, PNG ou WEBP com ate 3 MB.
+                    </p>
+                    {foto && (
+                      <p className="text-xs font-medium text-primary">
+                        Foto selecionada: {foto.name}
+                      </p>
+                    )}
                   </div>
 
                   <Button type="submit" size="lg" className="w-full" disabled={status === "sending"}>

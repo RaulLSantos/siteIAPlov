@@ -4,7 +4,9 @@ import {
   digitsOnly,
   formatWhatsapp,
   localWhatsappDigits,
+  MAX_PHOTO_BYTES,
   normalizedBrazilWhatsapp,
+  validatePhotoFile,
   validateInscricao,
 } from "./inscricao";
 
@@ -96,6 +98,53 @@ describe("inscricao helpers", () => {
         whatsappNumeros: "5545999999999",
         evento: "Encontro de Casais",
         origem: "Site",
+      });
+    });
+
+    it("inclui metadados da foto quando informada", () => {
+      expect(
+        createInscricaoPayload(
+          {
+            nome: "Raul Santos",
+            email: "raul@email.com",
+            whatsapp: "45999999999",
+          },
+          {
+            dataUrl: "data:image/jpeg;base64,abc",
+            name: "casal.jpg",
+            type: "image/jpeg",
+          },
+        ),
+      ).toMatchObject({
+        fotoBase64: "data:image/jpeg;base64,abc",
+        fotoNome: "casal.jpg",
+        fotoTipo: "image/jpeg",
+      });
+    });
+  });
+
+  describe("foto", () => {
+    it("aceita foto ausente", () => {
+      expect(validatePhotoFile(null)).toEqual({ valid: true });
+    });
+
+    it("aceita formatos de imagem permitidos", () => {
+      expect(validatePhotoFile({ size: 1000, type: "image/jpeg" })).toEqual({ valid: true });
+      expect(validatePhotoFile({ size: 1000, type: "image/png" })).toEqual({ valid: true });
+      expect(validatePhotoFile({ size: 1000, type: "image/webp" })).toEqual({ valid: true });
+    });
+
+    it("rejeita arquivo que nao e imagem permitida", () => {
+      expect(validatePhotoFile({ size: 1000, type: "application/pdf" })).toEqual({
+        valid: false,
+        message: "Envie uma foto nos formatos JPG, PNG ou WEBP.",
+      });
+    });
+
+    it("rejeita imagem maior que o limite", () => {
+      expect(validatePhotoFile({ size: MAX_PHOTO_BYTES + 1, type: "image/jpeg" })).toEqual({
+        valid: false,
+        message: "A foto deve ter no maximo 3 MB.",
       });
     });
   });

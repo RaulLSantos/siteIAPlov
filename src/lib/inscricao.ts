@@ -11,6 +11,9 @@ export interface InscricaoPayload {
   whatsappNumeros: string;
   evento: string;
   origem: string;
+  fotoBase64?: string;
+  fotoNome?: string;
+  fotoTipo?: string;
 }
 
 export interface ValidationResult {
@@ -19,6 +22,10 @@ export interface ValidationResult {
 }
 
 const toText = (value: unknown) => String(value ?? "");
+
+export const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
+
+export const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export const digitsOnly = (value: unknown) => toText(value).replace(/\D/g, "");
 
@@ -69,11 +76,46 @@ export const validateInscricao = ({ nome, email, whatsapp }: InscricaoFormValues
   return { valid: true };
 };
 
-export const createInscricaoPayload = (values: InscricaoFormValues): InscricaoPayload => ({
-  nome: toText(values.nome).trim(),
-  email: toText(values.email).trim(),
-  whatsapp: formatWhatsapp(values.whatsapp),
-  whatsappNumeros: normalizedBrazilWhatsapp(values.whatsapp),
-  evento: "Encontro de Casais",
-  origem: "Site",
-});
+export const validatePhotoFile = (file: Pick<File, "size" | "type"> | null | undefined): ValidationResult => {
+  if (!file) {
+    return { valid: true };
+  }
+
+  if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
+    return {
+      valid: false,
+      message: "Envie uma foto nos formatos JPG, PNG ou WEBP.",
+    };
+  }
+
+  if (file.size > MAX_PHOTO_BYTES) {
+    return {
+      valid: false,
+      message: "A foto deve ter no maximo 3 MB.",
+    };
+  }
+
+  return { valid: true };
+};
+
+export const createInscricaoPayload = (
+  values: InscricaoFormValues,
+  photo?: { dataUrl: string; name: string; type: string } | null,
+): InscricaoPayload => {
+  const payload: InscricaoPayload = {
+    nome: toText(values.nome).trim(),
+    email: toText(values.email).trim(),
+    whatsapp: formatWhatsapp(values.whatsapp),
+    whatsappNumeros: normalizedBrazilWhatsapp(values.whatsapp),
+    evento: "Encontro de Casais",
+    origem: "Site",
+  };
+
+  if (photo?.dataUrl) {
+    payload.fotoBase64 = photo.dataUrl;
+    payload.fotoNome = photo.name;
+    payload.fotoTipo = photo.type;
+  }
+
+  return payload;
+};
