@@ -16,7 +16,7 @@ import {
 } from "@/lib/inscricao";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwCfQZT1AUqYjaIlI1sfG19HPmfl8PeyCqDQTIg4AC7MGiSobcYTHGN369uHWgHBUgDSQ/exec";
+  "https://script.google.com/macros/s/AKfycbw3lqhC5dXv9g6XDu3P9zk1aEJVuIARV6NjZzWN4oqI4GToXqWk8632Syf050pq5ravrA/exec";
 
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
@@ -150,13 +150,13 @@ const Inscricoes = () => {
                   Encontro de Casais
                 </h1>
                 <p className="mt-5 text-lg leading-8 text-muted-foreground">
-                                  Participe do nosso Encontro de Casais e viva um momento especial ao lado de quem você ama. Será uma tarde preparada para fortalecer relacionamentos, promover comunhão e criar memórias marcantes.
-
-                              </p>
-                              <p className="mt-5 text-lg leading-8 text-muted-foreground">
-                                  Preencha sua inscrição com seus dados e, se desejar, envie uma foto do casal. A foto é opcional e poderá ser utilizada na lembrancinha preparada para o evento.
-
-                              </p>
+                  Participe do nosso Encontro de Casais e viva um momento especial ao lado de quem você ama.
+                  Será uma tarde preparada para fortalecer relacionamentos, promover comunhão e criar memórias marcantes.
+                </p>
+                <p className="mt-5 text-lg leading-8 text-muted-foreground">
+                  Preencha sua inscrição com seus dados e, se desejar, envie uma foto do casal.
+                  A foto é opcional e poderá ser utilizada na lembrancinha preparada para o evento.
+                </p>
                 <div className="mt-8 flex items-center gap-3 text-primary">
                   <HeartHandshake className="h-6 w-6" aria-hidden="true" />
                   <span className="font-body text-sm font-semibold uppercase tracking-[0.16em]">
@@ -276,7 +276,7 @@ const Inscricoes = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Opcional. Envie JPEG, JPG, PNG ou WEBP com ate 10 MB.
+                      Opcional. Envie JPEG, JPG, PNG ou WEBP com ate 10 MB. A foto sera usada na lembrancinha do casal.
                     </p>
                     {foto && (
                       <p className="text-xs font-medium text-primary">

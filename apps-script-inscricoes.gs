@@ -97,9 +97,7 @@ function testarInscricaoSemFoto() {
       conjuge: "Teste Conjuge",
       email: "teste.casal@example.com",
       whatsapp: "(45) 99999-0001",
-      whatsappNumeros: "5545999990001",
-      evento: "Encontro de Casais",
-      origem: "Teste Apps Script"
+      whatsappNumeros: "5545999990001"
     }
   });
 }
@@ -115,8 +113,6 @@ function testarInscricaoComFoto() {
       email: "teste.casal.foto@example.com",
       whatsapp: "(45) 99999-0002",
       whatsappNumeros: "5545999990002",
-      evento: "Encontro de Casais",
-      origem: "Teste Apps Script",
       fotoBase64: png1x1,
       fotoNome: "teste-casal.png",
       fotoTipo: "image/png"
@@ -137,8 +133,6 @@ function processarInscricao(e) {
     const conjuge = String(parametros.conjuge || "").trim();
     const email = String(parametros.email || "").trim();
     const whatsapp = String(parametros.whatsapp || "").trim();
-    const evento = String(parametros.evento || "Encontro de Casais").trim();
-    const origem = String(parametros.origem || "Site").trim();
 
     const whatsappNormalizado = normalizarWhatsapp(parametros.whatsappNumeros || whatsapp);
     const emailNormalizado = normalizarEmail(email);
@@ -197,8 +191,6 @@ function processarInscricao(e) {
       whatsapp,
       whatsapp_normalizado: whatsappNormalizado,
       email_normalizado: emailNormalizado,
-      evento,
-      origem,
       status: statusPlanilha,
       observacao,
       foto_url: foto.url,
