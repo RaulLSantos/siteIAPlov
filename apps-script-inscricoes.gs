@@ -22,7 +22,8 @@ const CABECALHOS = [
   "confirmacao_enviada",
   "data_confirmacao",
   "erro_envio",
-  "data_ultimo_processamento"
+  "data_ultimo_processamento",
+  "conjuge"
 ];
 
 function doGet(e) {
@@ -45,6 +46,7 @@ function testarInscricaoSemFoto() {
   return processarInscricao({
     parameter: {
       nome: "Teste Casal",
+      conjuge: "Teste Conjuge",
       email: "teste.casal@example.com",
       whatsapp: "(45) 99999-0001",
       whatsappNumeros: "5545999990001",
@@ -61,6 +63,7 @@ function testarInscricaoComFoto() {
   return processarInscricao({
     parameter: {
       nome: "Teste Casal Foto",
+      conjuge: "Teste Conjuge Foto",
       email: "teste.casal.foto@example.com",
       whatsapp: "(45) 99999-0002",
       whatsappNumeros: "5545999990002",
@@ -83,6 +86,7 @@ function processarInscricao(e) {
     garantirCabecalhos(sheet);
 
     const nome = String(parametros.nome || "").trim();
+    const conjuge = String(parametros.conjuge || "").trim();
     const email = String(parametros.email || "").trim();
     const whatsapp = String(parametros.whatsapp || "").trim();
     const evento = String(parametros.evento || "Encontro de Casais").trim();
@@ -156,7 +160,8 @@ function processarInscricao(e) {
       "",
       "",
       "",
-      ""
+      "",
+      conjuge
     ]);
 
     return {

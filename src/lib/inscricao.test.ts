@@ -88,11 +88,13 @@ describe("inscricao helpers", () => {
       expect(
         createInscricaoPayload({
           nome: "  Raul Santos ",
+          conjuge: "  Maria Santos ",
           email: "  RAUL@EMAIL.COM ",
           whatsapp: "+55 45 99999-9999",
         }),
       ).toEqual({
         nome: "Raul Santos",
+        conjuge: "Maria Santos",
         email: "RAUL@EMAIL.COM",
         whatsapp: "(45) 99999-9999",
         whatsappNumeros: "5545999999999",
@@ -106,6 +108,7 @@ describe("inscricao helpers", () => {
         createInscricaoPayload(
           {
             nome: "Raul Santos",
+            conjuge: "Maria Santos",
             email: "raul@email.com",
             whatsapp: "45999999999",
           },

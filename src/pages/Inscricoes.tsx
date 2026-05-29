@@ -1,5 +1,5 @@
 import { FormEvent, useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, HeartHandshake, Image, Loader2, Mail, Phone, User } from "lucide-react";
+import { AlertCircle, CheckCircle2, HeartHandshake, Image, Loader2, Mail, Phone, User, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@/lib/inscricao";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxs87IkI862Lpt3NdcpjQMUqrHoT7g9e0xHVGejs4W5wlu-0AgXZkKRURhvJZ8SZ4C_0A/exec";
+  "https://script.google.com/macros/s/AKfycbwXYNRQLe5yIJFRPnD6BDEZEatfj0L21YDJhs3duqr-mwajw92_lVH-a9G21n-Abo02iw/exec";
 
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
@@ -33,6 +33,7 @@ const fileToDataUrl = (file: File) =>
 
 const Inscricoes = () => {
   const [nome, setNome] = useState("");
+  const [conjuge, setConjuge] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
@@ -78,7 +79,7 @@ const Inscricoes = () => {
             type: foto.type || "image/jpeg",
           }
         : null;
-      const payload = createInscricaoPayload({ nome, email, whatsapp }, fotoPayload);
+      const payload = createInscricaoPayload({ nome, conjuge, email, whatsapp }, fotoPayload);
       const formData = new URLSearchParams();
 
       Object.entries({
@@ -102,6 +103,7 @@ const Inscricoes = () => {
         setMessage(mensagem);
         setStatus("success");
         setNome("");
+        setConjuge("");
         setEmail("");
         setWhatsapp("");
         setFoto(null);
@@ -181,6 +183,24 @@ const Inscricoes = () => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="conjuge">Nome do conjuge</Label>
+                    <div className="relative">
+                      <Users className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="conjuge"
+                        name="conjuge"
+                        autoComplete="name"
+                        className="pl-10"
+                        value={conjuge}
+                        onChange={(event) => {
+                          setConjuge(event.target.value);
+                          resetFeedback();
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="email">E-mail *</Label>
                     <div className="relative">
                       <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -252,7 +272,7 @@ const Inscricoes = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Opcional. Envie JPEG, JPG, PNG ou WEBP com ate 10 MB.
+                      Opcional. Envie JPEG, JPG, PNG ou WEBP com ate 10 MB. A foto sera usada na lembrancinha do casal.
                     </p>
                     {foto && (
                       <p className="text-xs font-medium text-primary">

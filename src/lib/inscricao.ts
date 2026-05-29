@@ -1,11 +1,13 @@
 export interface InscricaoFormValues {
   nome: unknown;
+  conjuge?: unknown;
   email: unknown;
   whatsapp: unknown;
 }
 
 export interface InscricaoPayload {
   nome: string;
+  conjuge: string;
   email: string;
   whatsapp: string;
   whatsappNumeros: string;
@@ -117,6 +119,7 @@ export const createInscricaoPayload = (
 ): InscricaoPayload => {
   const payload: InscricaoPayload = {
     nome: toText(values.nome).trim(),
+    conjuge: toText(values.conjuge).trim(),
     email: toText(values.email).trim(),
     whatsapp: formatWhatsapp(values.whatsapp),
     whatsappNumeros: normalizedBrazilWhatsapp(values.whatsapp),
