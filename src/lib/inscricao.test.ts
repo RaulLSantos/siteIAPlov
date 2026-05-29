@@ -98,8 +98,6 @@ describe("inscricao helpers", () => {
         email: "RAUL@EMAIL.COM",
         whatsapp: "(45) 99999-9999",
         whatsappNumeros: "5545999999999",
-        evento: "Encontro de Casais",
-        origem: "Site",
       });
     });
 

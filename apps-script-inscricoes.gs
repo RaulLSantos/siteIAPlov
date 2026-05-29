@@ -6,24 +6,16 @@ const CABECALHOS = [
   "id_inscricao",
   "data",
   "nome",
+  "conjuge",
   "email",
   "whatsapp",
   "whatsapp_normalizado",
   "email_normalizado",
-  "evento",
-  "origem",
   "status",
   "observacao",
   "foto_url",
   "foto_arquivo_id",
-  "foto_nome",
-  "mensagem_inicial_enviada",
-  "data_mensagem_inicial",
-  "confirmacao_enviada",
-  "data_confirmacao",
-  "erro_envio",
-  "data_ultimo_processamento",
-  "conjuge"
+  "foto_nome"
 ];
 
 function doGet(e) {
@@ -40,6 +32,62 @@ function doPost(e) {
 function configurarPlanilha() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   garantirCabecalhos(sheet);
+}
+
+function migrarPlanilhaParaColunasAtuais() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const dados = sheet.getDataRange().getValues();
+
+  if (dados.length === 0) {
+    garantirCabecalhos(sheet);
+    return;
+  }
+
+  const cabecalhosAtuais = dados[0].map(function (cabecalho) {
+    return String(cabecalho || "").trim();
+  });
+  const indices = cabecalhosAtuais.reduce(function (mapa, cabecalho, index) {
+    if (cabecalho) mapa[cabecalho] = index;
+    return mapa;
+  }, {});
+
+  const novosDados = [CABECALHOS];
+
+  for (let i = 1; i < dados.length; i++) {
+    const linhaAtual = dados[i];
+    const novaLinha = CABECALHOS.map(function (cabecalho) {
+      if (indices[cabecalho] !== undefined) {
+        const valorAtual = linhaAtual[indices[cabecalho]];
+
+        if (valorAtual !== "") {
+          return valorAtual;
+        }
+      }
+
+      if (cabecalho === "whatsapp_normalizado") {
+        return normalizarWhatsapp(indices.whatsapp === undefined ? "" : linhaAtual[indices.whatsapp]);
+      }
+
+      if (cabecalho === "email_normalizado") {
+        return normalizarEmail(indices.email === undefined ? "" : linhaAtual[indices.email]);
+      }
+
+      return "";
+    });
+    novosDados.push(novaLinha);
+  }
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, novosDados.length, CABECALHOS.length).setValues(novosDados);
+
+  const colunasExtras = sheet.getMaxColumns() - CABECALHOS.length;
+  if (colunasExtras > 0) {
+    sheet.deleteColumns(CABECALHOS.length + 1, colunasExtras);
+  }
+}
+
+function removerColunasNaoUsadas() {
+  migrarPlanilhaParaColunasAtuais();
 }
 
 function testarInscricaoSemFoto() {
@@ -111,8 +159,8 @@ function processarInscricao(e) {
     let mensagem = "Inscricao realizada com sucesso.";
 
     for (let i = 1; i < dados.length; i++) {
-      const whatsappExistente = normalizarWhatsapp(dados[i][indices.whatsapp_normalizado]);
-      const emailExistente = normalizarEmail(dados[i][indices.email_normalizado]);
+      const whatsappExistente = normalizarWhatsapp(obterValorDaLinha(dados[i], indices, "whatsapp", ["whatsapp_normalizado"]));
+      const emailExistente = normalizarEmail(obterValorDaLinha(dados[i], indices, "email", ["email_normalizado"]));
 
       if (whatsappExistente && whatsappExistente === whatsappNormalizado) {
         statusPlanilha = "Duplicado";
@@ -140,29 +188,23 @@ function processarInscricao(e) {
       idInscricao
     });
 
-    sheet.appendRow([
-      idInscricao,
-      new Date(),
+    adicionarLinha(sheet, {
+      id_inscricao: idInscricao,
+      data: new Date(),
       nome,
+      conjuge,
       email,
       whatsapp,
-      whatsappNormalizado,
-      emailNormalizado,
+      whatsapp_normalizado: whatsappNormalizado,
+      email_normalizado: emailNormalizado,
       evento,
       origem,
-      statusPlanilha,
+      status: statusPlanilha,
       observacao,
-      foto.url,
-      foto.id,
-      foto.nome,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      conjuge
-    ]);
+      foto_url: foto.url,
+      foto_arquivo_id: foto.id,
+      foto_nome: foto.nome
+    });
 
     return {
       status: statusResposta,
@@ -179,15 +221,67 @@ function processarInscricao(e) {
 }
 
 function garantirCabecalhos(sheet) {
-  sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
+  const ultimaColuna = Math.max(sheet.getLastColumn(), CABECALHOS.length);
+  const cabecalhosAtuais = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(function (cabecalho) {
+    return String(cabecalho || "").trim();
+  });
+
+  const temCabecalho = cabecalhosAtuais.some(function (cabecalho) {
+    return cabecalho !== "";
+  });
+
+  if (!temCabecalho) {
+    sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
+    return;
+  }
+
+  let proximaColuna = cabecalhosAtuais.length + 1;
+
+  CABECALHOS.forEach(function (cabecalho) {
+    if (cabecalhosAtuais.indexOf(cabecalho) === -1) {
+      sheet.getRange(1, proximaColuna).setValue(cabecalho);
+      cabecalhosAtuais.push(cabecalho);
+      proximaColuna++;
+    }
+  });
 }
 
 function criarMapaCabecalhos(sheet) {
-  const primeiraLinha = sheet.getRange(1, 1, 1, CABECALHOS.length).getValues()[0];
+  const primeiraLinha = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   return primeiraLinha.reduce(function (mapa, cabecalho, index) {
     mapa[cabecalho] = index;
     return mapa;
   }, {});
+}
+
+function obterValorDaLinha(linha, indices, cabecalho, alternativas) {
+  const nomes = [cabecalho].concat(alternativas || []);
+
+  for (let i = 0; i < nomes.length; i++) {
+    const indice = indices[nomes[i]];
+
+    if (indice !== undefined && linha[indice] !== undefined && linha[indice] !== "") {
+      return linha[indice];
+    }
+  }
+
+  return "";
+}
+
+function adicionarLinha(sheet, valores) {
+  const indices = criarMapaCabecalhos(sheet);
+  const totalColunas = sheet.getLastColumn();
+  const linha = new Array(totalColunas).fill("");
+
+  Object.keys(valores).forEach(function (cabecalho) {
+    const indice = indices[cabecalho];
+
+    if (indice !== undefined) {
+      linha[indice] = valores[cabecalho];
+    }
+  });
+
+  sheet.appendRow(linha);
 }
 
 function salvarFotoNoDrive(dadosFoto) {

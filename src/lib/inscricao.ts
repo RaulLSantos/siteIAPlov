@@ -11,8 +11,6 @@ export interface InscricaoPayload {
   email: string;
   whatsapp: string;
   whatsappNumeros: string;
-  evento: string;
-  origem: string;
   fotoBase64?: string;
   fotoNome?: string;
   fotoTipo?: string;
@@ -123,8 +121,6 @@ export const createInscricaoPayload = (
     email: toText(values.email).trim(),
     whatsapp: formatWhatsapp(values.whatsapp),
     whatsappNumeros: normalizedBrazilWhatsapp(values.whatsapp),
-    evento: "Encontro de Casais",
-    origem: "Site",
   };
 
   if (photo?.dataUrl) {
