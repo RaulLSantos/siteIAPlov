@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   ACCEPTED_PHOTO_TYPES,
+  ACCEPTED_PHOTO_EXTENSIONS,
   createInscricaoPayload,
   formatWhatsapp,
   localWhatsappDigits,
@@ -37,6 +38,7 @@ const Inscricoes = () => {
   const [foto, setFoto] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "duplicate" | "possibleDuplicate" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [pixQrAvailable, setPixQrAvailable] = useState(true);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const resetFeedback = () => {
@@ -73,7 +75,7 @@ const Inscricoes = () => {
         ? {
             dataUrl: await fileToDataUrl(foto),
             name: foto.name,
-            type: foto.type,
+            type: foto.type || "image/jpeg",
           }
         : null;
       const payload = createInscricaoPayload({ nome, email, whatsapp }, fotoPayload);
@@ -230,7 +232,7 @@ const Inscricoes = () => {
                         id="foto"
                         name="foto"
                         type="file"
-                        accept={ACCEPTED_PHOTO_TYPES.join(",")}
+                        accept={[...ACCEPTED_PHOTO_TYPES, ...ACCEPTED_PHOTO_EXTENSIONS].join(",")}
                         className="pl-10"
                         onChange={(event) => {
                           const selectedFile = event.target.files?.[0] || null;
@@ -250,7 +252,7 @@ const Inscricoes = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Opcional. Envie JPG, PNG ou WEBP com ate 3 MB.
+                      Opcional. Envie JPEG, JPG, PNG ou WEBP com ate 10 MB.
                     </p>
                     {foto && (
                       <p className="text-xs font-medium text-primary">
@@ -271,9 +273,37 @@ const Inscricoes = () => {
                   </Button>
 
                   {status === "success" && (
-                    <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                      <p>{message}</p>
+                    <div className="space-y-4 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-900">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                        <p>{message}</p>
+                      </div>
+                      <div className="rounded-md border border-green-200 bg-white p-4">
+                        <p className="text-base font-semibold text-foreground">Pagamento via PIX</p>
+                        <p className="mt-1 text-muted-foreground">
+                          O valor da inscricao e de R$260,00. Use o QR Code ou a chave telefone abaixo.
+                        </p>
+                        <div className="mt-4 grid gap-4 sm:grid-cols-[160px_1fr] sm:items-center">
+                          {pixQrAvailable ? (
+                            <img
+                              src="/pix-encontro-casais.png"
+                              alt="QR Code PIX para pagamento da inscricao do Encontro de Casais"
+                              className="h-40 w-40 rounded-md border border-border bg-white object-contain p-2"
+                              onError={() => setPixQrAvailable(false)}
+                            />
+                          ) : (
+                            <div className="rounded-md border border-border bg-muted/40 p-4 text-xs text-muted-foreground">
+                              QR Code indisponivel no momento. Use a chave telefone ao lado para realizar o PIX.
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                              Chave PIX telefone
+                            </p>
+                            <p className="mt-2 text-xl font-bold text-foreground">(45) 99852-3346</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 

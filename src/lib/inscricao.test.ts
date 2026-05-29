@@ -130,21 +130,27 @@ describe("inscricao helpers", () => {
 
     it("aceita formatos de imagem permitidos", () => {
       expect(validatePhotoFile({ size: 1000, type: "image/jpeg" })).toEqual({ valid: true });
+      expect(validatePhotoFile({ size: 1000, type: "image/pjpeg" })).toEqual({ valid: true });
       expect(validatePhotoFile({ size: 1000, type: "image/png" })).toEqual({ valid: true });
       expect(validatePhotoFile({ size: 1000, type: "image/webp" })).toEqual({ valid: true });
     });
 
+    it("aceita jpg e jpeg pela extensao quando o navegador nao informa o tipo", () => {
+      expect(validatePhotoFile({ name: "casal.jpg", size: 1000, type: "" })).toEqual({ valid: true });
+      expect(validatePhotoFile({ name: "casal.jpeg", size: 1000, type: "" })).toEqual({ valid: true });
+    });
+
     it("rejeita arquivo que nao e imagem permitida", () => {
-      expect(validatePhotoFile({ size: 1000, type: "application/pdf" })).toEqual({
+      expect(validatePhotoFile({ name: "documento.pdf", size: 1000, type: "application/pdf" })).toEqual({
         valid: false,
-        message: "Envie uma foto nos formatos JPG, PNG ou WEBP.",
+        message: "Envie uma foto nos formatos JPEG, JPG, PNG ou WEBP.",
       });
     });
 
     it("rejeita imagem maior que o limite", () => {
       expect(validatePhotoFile({ size: MAX_PHOTO_BYTES + 1, type: "image/jpeg" })).toEqual({
         valid: false,
-        message: "A foto deve ter no maximo 3 MB.",
+        message: "A foto deve ter no maximo 10 MB.",
       });
     });
   });

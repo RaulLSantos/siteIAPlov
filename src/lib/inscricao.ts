@@ -23,9 +23,11 @@ export interface ValidationResult {
 
 const toText = (value: unknown) => String(value ?? "");
 
-export const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
+export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
-export const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/pjpeg", "image/png", "image/webp"];
+
+export const ACCEPTED_PHOTO_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 
 export const digitsOnly = (value: unknown) => toText(value).replace(/\D/g, "");
 
@@ -76,26 +78,37 @@ export const validateInscricao = ({ nome, email, whatsapp }: InscricaoFormValues
   return { valid: true };
 };
 
-export const validatePhotoFile = (file: Pick<File, "size" | "type"> | null | undefined): ValidationResult => {
+export const validatePhotoFile = (file: (Pick<File, "size" | "type"> & { name?: string }) | null | undefined): ValidationResult => {
   if (!file) {
     return { valid: true };
   }
 
-  if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
+  if (!isAcceptedPhotoFile(file)) {
     return {
       valid: false,
-      message: "Envie uma foto nos formatos JPG, PNG ou WEBP.",
+      message: "Envie uma foto nos formatos JPEG, JPG, PNG ou WEBP.",
     };
   }
 
   if (file.size > MAX_PHOTO_BYTES) {
     return {
       valid: false,
-      message: "A foto deve ter no maximo 3 MB.",
+      message: "A foto deve ter no maximo 10 MB.",
     };
   }
 
   return { valid: true };
+};
+
+export const isAcceptedPhotoFile = (file: Pick<File, "type"> & { name?: string }) => {
+  const type = toText(file.type).toLowerCase();
+  const name = toText(file.name).toLowerCase();
+
+  if (type && ACCEPTED_PHOTO_TYPES.includes(type)) {
+    return true;
+  }
+
+  return ACCEPTED_PHOTO_EXTENSIONS.some((extension) => name.endsWith(extension));
 };
 
 export const createInscricaoPayload = (

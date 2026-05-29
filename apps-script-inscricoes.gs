@@ -1,6 +1,6 @@
 const PASTA_FOTOS_NOME = "Fotos - Encontro de Casais";
-const MAX_FOTO_BYTES = 3 * 1024 * 1024;
-const TIPOS_FOTO_PERMITIDOS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FOTO_BYTES = 10 * 1024 * 1024;
+const TIPOS_FOTO_PERMITIDOS = ["image/jpeg", "image/pjpeg", "image/png", "image/webp"];
 
 const CABECALHOS = [
   "id_inscricao",
@@ -194,17 +194,17 @@ function salvarFotoNoDrive(dadosFoto) {
     };
   }
 
-  const tipo = String(dadosFoto.fotoTipo || "").trim();
+  const tipo = normalizarTipoFoto(dadosFoto.fotoTipo, dadosFoto.fotoNome, dadosFoto.fotoBase64);
 
   if (TIPOS_FOTO_PERMITIDOS.indexOf(tipo) === -1) {
-    throw new Error("Envie uma foto nos formatos JPG, PNG ou WEBP.");
+    throw new Error("Envie uma foto nos formatos JPEG, JPG, PNG ou WEBP.");
   }
 
   const base64 = String(dadosFoto.fotoBase64).replace(/^data:[^;]+;base64,/, "");
   const bytes = Utilities.base64Decode(base64);
 
   if (bytes.length > MAX_FOTO_BYTES) {
-    throw new Error("A foto deve ter no maximo 3 MB.");
+    throw new Error("A foto deve ter no maximo 10 MB.");
   }
 
   const extensao = extensaoPorTipo(tipo);
@@ -249,6 +249,48 @@ function extensaoPorTipo(tipo) {
   if (tipo === "image/png") return "png";
   if (tipo === "image/webp") return "webp";
   return "jpg";
+}
+
+function normalizarTipoFoto(tipoInformado, nomeArquivo, dataUrl) {
+  const tipo = String(tipoInformado || "").trim().toLowerCase();
+
+  if (tipo === "image/jpg" || tipo === "image/pjpeg") {
+    return "image/jpeg";
+  }
+
+  if (TIPOS_FOTO_PERMITIDOS.indexOf(tipo) !== -1) {
+    return tipo;
+  }
+
+  const dataUrlTexto = String(dataUrl || "").toLowerCase();
+
+  if (dataUrlTexto.indexOf("data:image/jpeg;") === 0 || dataUrlTexto.indexOf("data:image/jpg;") === 0) {
+    return "image/jpeg";
+  }
+
+  if (dataUrlTexto.indexOf("data:image/png;") === 0) {
+    return "image/png";
+  }
+
+  if (dataUrlTexto.indexOf("data:image/webp;") === 0) {
+    return "image/webp";
+  }
+
+  const nome = String(nomeArquivo || "").trim().toLowerCase();
+
+  if (nome.endsWith(".jpg") || nome.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+
+  if (nome.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (nome.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  return tipo;
 }
 
 function normalizarEmail(valor) {
