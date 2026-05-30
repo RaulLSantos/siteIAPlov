@@ -16,7 +16,7 @@ import {
 } from "@/lib/inscricao";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbw3lqhC5dXv9g6XDu3P9zk1aEJVuIARV6NjZzWN4oqI4GToXqWk8632Syf050pq5ravrA/exec";
+  "https://script.google.com/macros/s/AKfycbyug0YG-gXsBpZN9s3FFMNuUoPBjtXTBUzY01ApjPcQa7Bq2qfdMwHXov3k2nQ1xQjLjg/exec";
 
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;

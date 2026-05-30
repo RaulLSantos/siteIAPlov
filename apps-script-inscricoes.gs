@@ -1,6 +1,7 @@
 const PASTA_FOTOS_NOME = "Fotos - Encontro de Casais";
 const MAX_FOTO_BYTES = 10 * 1024 * 1024;
 const TIPOS_FOTO_PERMITIDOS = ["image/jpeg", "image/pjpeg", "image/png", "image/webp"];
+const VERSAO_SCRIPT = "colunas-atuais-2026-05-29";
 
 const CABECALHOS = [
   "id_inscricao",
@@ -31,15 +32,20 @@ function doPost(e) {
 
 function configurarPlanilha() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  garantirCabecalhos(sheet);
+  normalizarPlanilhaParaColunasAtuais(sheet);
 }
 
 function migrarPlanilhaParaColunasAtuais() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  normalizarPlanilhaParaColunasAtuais(sheet);
+}
+
+function normalizarPlanilhaParaColunasAtuais(sheet) {
   const dados = sheet.getDataRange().getValues();
 
   if (dados.length === 0) {
-    garantirCabecalhos(sheet);
+    sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
+    removerColunasExtras(sheet);
     return;
   }
 
@@ -79,11 +85,7 @@ function migrarPlanilhaParaColunasAtuais() {
 
   sheet.clearContents();
   sheet.getRange(1, 1, novosDados.length, CABECALHOS.length).setValues(novosDados);
-
-  const colunasExtras = sheet.getMaxColumns() - CABECALHOS.length;
-  if (colunasExtras > 0) {
-    sheet.deleteColumns(CABECALHOS.length + 1, colunasExtras);
-  }
+  removerColunasExtras(sheet);
 }
 
 function removerColunasNaoUsadas() {
@@ -127,7 +129,7 @@ function processarInscricao(e) {
   try {
     const parametros = (e && e.parameter) || {};
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    garantirCabecalhos(sheet);
+    normalizarPlanilhaParaColunasAtuais(sheet);
 
     const nome = String(parametros.nome || "").trim();
     const conjuge = String(parametros.conjuge || "").trim();
@@ -140,7 +142,8 @@ function processarInscricao(e) {
     if (!nome || !emailNormalizado || !whatsappNormalizado) {
       return {
         status: "erro",
-        mensagem: "Preencha nome, e-mail e WhatsApp corretamente."
+        mensagem: "Preencha nome, e-mail e WhatsApp corretamente.",
+        versao: VERSAO_SCRIPT
       };
     }
 
@@ -200,12 +203,14 @@ function processarInscricao(e) {
 
     return {
       status: statusResposta,
-      mensagem
+      mensagem,
+      versao: VERSAO_SCRIPT
     };
   } catch (erro) {
     return {
       status: "erro",
-      mensagem: erro && erro.message ? erro.message : "Erro ao enviar inscricao. Tente novamente."
+      mensagem: erro && erro.message ? erro.message : "Erro ao enviar inscricao. Tente novamente.",
+      versao: VERSAO_SCRIPT
     };
   } finally {
     lock.releaseLock();
@@ -213,29 +218,15 @@ function processarInscricao(e) {
 }
 
 function garantirCabecalhos(sheet) {
-  const ultimaColuna = Math.max(sheet.getLastColumn(), CABECALHOS.length);
-  const cabecalhosAtuais = sheet.getRange(1, 1, 1, ultimaColuna).getValues()[0].map(function (cabecalho) {
-    return String(cabecalho || "").trim();
-  });
+  normalizarPlanilhaParaColunasAtuais(sheet);
+}
 
-  const temCabecalho = cabecalhosAtuais.some(function (cabecalho) {
-    return cabecalho !== "";
-  });
+function removerColunasExtras(sheet) {
+  const colunasExtras = sheet.getMaxColumns() - CABECALHOS.length;
 
-  if (!temCabecalho) {
-    sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
-    return;
+  if (colunasExtras > 0) {
+    sheet.deleteColumns(CABECALHOS.length + 1, colunasExtras);
   }
-
-  let proximaColuna = cabecalhosAtuais.length + 1;
-
-  CABECALHOS.forEach(function (cabecalho) {
-    if (cabecalhosAtuais.indexOf(cabecalho) === -1) {
-      sheet.getRange(1, proximaColuna).setValue(cabecalho);
-      cabecalhosAtuais.push(cabecalho);
-      proximaColuna++;
-    }
-  });
 }
 
 function criarMapaCabecalhos(sheet) {
