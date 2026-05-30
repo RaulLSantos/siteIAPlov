@@ -16,7 +16,7 @@ import {
 } from "@/lib/inscricao";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyug0YG-gXsBpZN9s3FFMNuUoPBjtXTBUzY01ApjPcQa7Bq2qfdMwHXov3k2nQ1xQjLjg/exec";
+  "https://script.google.com/macros/s/AKfycbxurCcLX7G-uyaZA2EzL2UlYw31ye0ErGkZKb_ju80_L-7l58JKDFNs-etZN0kVaUXHSA/exec";
 
 interface ScriptResponse {
   status?: "sucesso" | "erro" | "duplicado" | "possivel_duplicado" | string;
@@ -31,6 +31,14 @@ const fileToDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const createSubmissionId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
 const Inscricoes = () => {
   const [nome, setNome] = useState("");
   const [conjuge, setConjuge] = useState("");
@@ -41,6 +49,7 @@ const Inscricoes = () => {
   const [message, setMessage] = useState("");
   const [pixQrAvailable, setPixQrAvailable] = useState(true);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef(false);
 
   const resetFeedback = () => {
     if (status !== "idle" && status !== "sending") {
@@ -51,6 +60,10 @@ const Inscricoes = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSubmittingRef.current) {
+      return;
+    }
 
     const whatsappNormalizado = normalizedBrazilWhatsapp(whatsapp);
 
@@ -68,6 +81,7 @@ const Inscricoes = () => {
       return;
     }
 
+    isSubmittingRef.current = true;
     setStatus("sending");
     setMessage("");
 
@@ -84,6 +98,7 @@ const Inscricoes = () => {
 
       Object.entries({
         ...payload,
+        idInscricao: createSubmissionId(),
         whatsappNumeros: whatsappNormalizado,
       }).forEach(([key, value]) => {
         if (value !== undefined) {
@@ -131,6 +146,8 @@ const Inscricoes = () => {
       console.error(error);
       setMessage("Nao foi possivel enviar a inscricao. Tente novamente em instantes.");
       setStatus("error");
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 

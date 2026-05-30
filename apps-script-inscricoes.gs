@@ -1,7 +1,7 @@
 const PASTA_FOTOS_NOME = "Fotos - Encontro de Casais";
 const MAX_FOTO_BYTES = 10 * 1024 * 1024;
 const TIPOS_FOTO_PERMITIDOS = ["image/jpeg", "image/pjpeg", "image/png", "image/webp"];
-const VERSAO_SCRIPT = "colunas-atuais-2026-05-29";
+const VERSAO_SCRIPT = "inscricao-simples-2026-05-29";
 
 const CABECALHOS = [
   "id_inscricao",
@@ -19,10 +19,12 @@ const CABECALHOS = [
   "foto_nome"
 ];
 
-function doGet(e) {
-  const resultado = processarInscricao(e);
-  const parametros = (e && e.parameter) || {};
-  return respostaJSONP(resultado, parametros.callback);
+function doGet() {
+  return respostaJSON({
+    status: "ok",
+    mensagem: "Endpoint de inscricao ativo. Use POST para cadastrar.",
+    versao: VERSAO_SCRIPT
+  });
 }
 
 function doPost(e) {
@@ -31,19 +33,14 @@ function doPost(e) {
 }
 
 function configurarPlanilha() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  normalizarPlanilhaParaColunasAtuais(sheet);
+  migrarPlanilhaParaColunasAtuais();
 }
 
 function migrarPlanilhaParaColunasAtuais() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  normalizarPlanilhaParaColunasAtuais(sheet);
-}
-
-function normalizarPlanilhaParaColunasAtuais(sheet) {
   const dados = sheet.getDataRange().getValues();
 
-  if (dados.length === 0) {
+  if (dados.length === 0 || dados[0].every(function (valor) { return String(valor || "").trim() === ""; })) {
     sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
     removerColunasExtras(sheet);
     return;
@@ -52,30 +49,24 @@ function normalizarPlanilhaParaColunasAtuais(sheet) {
   const cabecalhosAtuais = dados[0].map(function (cabecalho) {
     return String(cabecalho || "").trim();
   });
-  const indices = cabecalhosAtuais.reduce(function (mapa, cabecalho, index) {
-    if (cabecalho) mapa[cabecalho] = index;
-    return mapa;
-  }, {});
-
+  const indices = criarMapaPorLista(cabecalhosAtuais);
   const novosDados = [CABECALHOS];
 
   for (let i = 1; i < dados.length; i++) {
     const linhaAtual = dados[i];
     const novaLinha = CABECALHOS.map(function (cabecalho) {
-      if (indices[cabecalho] !== undefined) {
-        const valorAtual = linhaAtual[indices[cabecalho]];
+      const indice = indices[cabecalho];
 
-        if (valorAtual !== "") {
-          return valorAtual;
-        }
+      if (indice !== undefined && linhaAtual[indice] !== "") {
+        return linhaAtual[indice];
       }
 
       if (cabecalho === "whatsapp_normalizado") {
-        return normalizarWhatsapp(indices.whatsapp === undefined ? "" : linhaAtual[indices.whatsapp]);
+        return normalizarWhatsapp(obterValorPorIndice(linhaAtual, indices, "whatsapp"));
       }
 
       if (cabecalho === "email_normalizado") {
-        return normalizarEmail(indices.email === undefined ? "" : linhaAtual[indices.email]);
+        return normalizarEmail(obterValorPorIndice(linhaAtual, indices, "email"));
       }
 
       return "";
@@ -95,6 +86,7 @@ function removerColunasNaoUsadas() {
 function testarInscricaoSemFoto() {
   return processarInscricao({
     parameter: {
+      idInscricao: Utilities.getUuid(),
       nome: "Teste Casal",
       conjuge: "Teste Conjuge",
       email: "teste.casal@example.com",
@@ -110,6 +102,7 @@ function testarInscricaoComFoto() {
 
   return processarInscricao({
     parameter: {
+      idInscricao: Utilities.getUuid(),
       nome: "Teste Casal Foto",
       conjuge: "Teste Conjuge Foto",
       email: "teste.casal.foto@example.com",
@@ -129,13 +122,13 @@ function processarInscricao(e) {
   try {
     const parametros = (e && e.parameter) || {};
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    normalizarPlanilhaParaColunasAtuais(sheet);
+    garantirCabecalhos(sheet);
 
+    const idInscricao = String(parametros.idInscricao || parametros.id_inscricao || Utilities.getUuid()).trim();
     const nome = String(parametros.nome || "").trim();
     const conjuge = String(parametros.conjuge || "").trim();
     const email = String(parametros.email || "").trim();
     const whatsapp = String(parametros.whatsapp || "").trim();
-
     const whatsappNormalizado = normalizarWhatsapp(parametros.whatsappNumeros || whatsapp);
     const emailNormalizado = normalizarEmail(email);
 
@@ -150,14 +143,26 @@ function processarInscricao(e) {
     const dados = sheet.getDataRange().getValues();
     const indices = criarMapaCabecalhos(sheet);
 
+    if (idInscricao && existeIdInscricao(dados, indices, idInscricao)) {
+      return {
+        status: "sucesso",
+        mensagem: "Inscricao ja recebida.",
+        versao: VERSAO_SCRIPT
+      };
+    }
+
     let statusPlanilha = "Nova inscricao";
     let observacao = "-";
     let statusResposta = "sucesso";
     let mensagem = "Inscricao realizada com sucesso.";
 
     for (let i = 1; i < dados.length; i++) {
-      const whatsappExistente = normalizarWhatsapp(obterValorDaLinha(dados[i], indices, "whatsapp", ["whatsapp_normalizado"]));
-      const emailExistente = normalizarEmail(obterValorDaLinha(dados[i], indices, "email", ["email_normalizado"]));
+      const whatsappExistente = normalizarWhatsapp(
+        obterValorDaLinha(dados[i], indices, "whatsapp_normalizado", ["whatsapp"])
+      );
+      const emailExistente = normalizarEmail(
+        obterValorDaLinha(dados[i], indices, "email_normalizado", ["email"])
+      );
 
       if (whatsappExistente && whatsappExistente === whatsappNormalizado) {
         statusPlanilha = "Duplicado";
@@ -175,7 +180,6 @@ function processarInscricao(e) {
       }
     }
 
-    const idInscricao = Utilities.getUuid();
     const foto = salvarFotoNoDrive({
       fotoBase64: parametros.fotoBase64,
       fotoNome: parametros.fotoNome,
@@ -218,7 +222,14 @@ function processarInscricao(e) {
 }
 
 function garantirCabecalhos(sheet) {
-  normalizarPlanilhaParaColunasAtuais(sheet);
+  const primeiraLinha = sheet.getRange(1, 1, 1, CABECALHOS.length).getValues()[0];
+  const cabecalhosVazios = primeiraLinha.every(function (valor) {
+    return String(valor || "").trim() === "";
+  });
+
+  if (cabecalhosVazios) {
+    sheet.getRange(1, 1, 1, CABECALHOS.length).setValues([CABECALHOS]);
+  }
 }
 
 function removerColunasExtras(sheet) {
@@ -231,10 +242,34 @@ function removerColunasExtras(sheet) {
 
 function criarMapaCabecalhos(sheet) {
   const primeiraLinha = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  return primeiraLinha.reduce(function (mapa, cabecalho, index) {
-    mapa[cabecalho] = index;
+  return criarMapaPorLista(primeiraLinha);
+}
+
+function criarMapaPorLista(lista) {
+  return lista.reduce(function (mapa, cabecalho, index) {
+    const nome = String(cabecalho || "").trim();
+    if (nome) mapa[nome] = index;
     return mapa;
   }, {});
+}
+
+function existeIdInscricao(dados, indices, idInscricao) {
+  const indice = indices.id_inscricao;
+
+  if (indice === undefined) return false;
+
+  for (let i = 1; i < dados.length; i++) {
+    if (String(dados[i][indice] || "").trim() === idInscricao) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function obterValorPorIndice(linha, indices, cabecalho) {
+  const indice = indices[cabecalho];
+  return indice === undefined ? "" : linha[indice];
 }
 
 function obterValorDaLinha(linha, indices, cabecalho, alternativas) {
@@ -253,7 +288,7 @@ function obterValorDaLinha(linha, indices, cabecalho, alternativas) {
 
 function adicionarLinha(sheet, valores) {
   const indices = criarMapaCabecalhos(sheet);
-  const totalColunas = sheet.getLastColumn();
+  const totalColunas = Math.max(sheet.getLastColumn(), CABECALHOS.length);
   const linha = new Array(totalColunas).fill("");
 
   Object.keys(valores).forEach(function (cabecalho) {
@@ -391,22 +426,6 @@ function normalizarWhatsapp(valor) {
   }
 
   return numeros.length === 13 ? numeros : "";
-}
-
-function respostaJSONP(objeto, callback) {
-  const callbackSeguro = String(callback || "").replace(/[^\w.$]/g, "");
-
-  if (!callbackSeguro) {
-    return ContentService
-      .createTextOutput('callback_invalido({"status":"erro","mensagem":"Callback invalido."});')
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  }
-
-  const payload = JSON.stringify(objeto).replace(/</g, "\\u003c");
-
-  return ContentService
-    .createTextOutput(`${callbackSeguro}(${payload});`)
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 function respostaJSON(objeto) {
