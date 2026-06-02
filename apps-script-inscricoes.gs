@@ -151,7 +151,7 @@ function processarInscricao(e) {
       };
     }
 
-    let statusPlanilha = "Nova inscricao";
+    let statusPlanilha = "nova inscrição";
     let observacao = "-";
     let statusResposta = "sucesso";
     let mensagem = "Inscricao realizada com sucesso.";

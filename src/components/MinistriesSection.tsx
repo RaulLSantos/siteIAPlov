@@ -10,12 +10,12 @@ import familyImg from "@/assets/ministry-family.jpg";
 const WHATSAPP_URL = "https://wa.me/5545999424023";
 
 const ministries = [
-  { name: "Ministério Infantil", desc: "Ensinamos as crianças sobre o amor de Deus com criatividade, carinho e diversão.", img: childrenImg },
-  { name: "Ministério de Jovens", desc: "Um espaço para jovens crescerem na fé, fortalecerem amizades e descobrirem seu propósito.", img: youthImg },
-  { name: "Ministério de Música e Artes", desc: "Louvamos a Deus através da música, canto e expressões artísticas que tocam o coração.", img: musicImg },
-  { name: "Ministério de Ensino", desc: "Aprofundamento bíblico e discipulado para fortalecer a fé e o conhecimento da Palavra.", img: teachingImg },
-  { name: "Ministério de Mulheres", desc: "Comunhão, oração e apoio mútuo entre mulheres que buscam viver segundo os propósitos de Deus.", img: womenImg },
-  { name: "Ministério da Família", desc: "Fortalecendo famílias através do ensino bíblico, aconselhamento e momentos de convivência.", img: familyImg },
+  { name: "Ministério Infantil", desc: "Ensinamos as crianças sobre o amor de Deus com criatividade, carinho e diversão.", img: childrenImg, alt: "Crianças participando do Ministério Infantil da Igreja da Promessa em Cascavel" },
+  { name: "Ministério de Jovens", desc: "Um espaço para jovens crescerem na fé, fortalecerem amizades e descobrirem seu propósito.", img: youthImg, alt: "Jovens reunidos no Ministério de Jovens da IAP Cascavel" },
+  { name: "Ministério de Música e Artes", desc: "Louvamos a Deus através da música, canto e expressões artísticas que tocam o coração.", img: musicImg, alt: "Ministério de Música e Artes conduzindo louvor em culto evangélico" },
+  { name: "Ministério de Ensino", desc: "Aprofundamento bíblico e discipulado para fortalecer a fé e o conhecimento da Palavra.", img: teachingImg, alt: "Ensino bíblico e discipulado na Igreja da Promessa Cascavel" },
+  { name: "Ministério de Mulheres", desc: "Comunhão, oração e apoio mútuo entre mulheres que buscam viver segundo os propósitos de Deus.", img: womenImg, alt: "Ministério de Mulheres em comunhão e oração na Igreja da Promessa" },
+  { name: "Ministério da Família", desc: "Fortalecendo famílias através do ensino bíblico, aconselhamento e momentos de convivência.", img: familyImg, alt: "Famílias acolhidas pela comunidade cristã da Igreja da Promessa em Cascavel" },
 ];
 
 const MinistriesSection = () => {
@@ -36,7 +36,7 @@ const MinistriesSection = () => {
           {ministries.map((m) => (
             <div key={m.name} className="group bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-border/50">
               <div className="h-48 overflow-hidden">
-                <img src={m.img} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={m.img} alt={m.alt} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{m.name}</h3>

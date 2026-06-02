@@ -10,7 +10,7 @@ const HeroSection = () => {
     <section id="home" className="relative min-h-[70vh] md:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
-        <img src={heroImg} alt="Culto de adoração" className="w-full h-full object-cover object-center" />
+        <img src={heroImg} alt="Culto de adoração na Igreja da Promessa em Cascavel, PR" className="w-full h-full object-cover object-center" fetchPriority="high" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-primary/90" />
       </div>
 
@@ -20,7 +20,7 @@ const HeroSection = () => {
           IAP Cascavel
         </p>
         <h1 className="text-primary-foreground font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-          Igreja da Promessa
+          Igreja da Promessa em Cascavel, PR
         </h1>
         <p className="text-primary-foreground/85 font-body text-lg md:text-xl max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
           Uma igreja para encontrar fé, esperança, ensino bíblico e comunhão. Venha como você está - Deus tem um plano para sua vida.
