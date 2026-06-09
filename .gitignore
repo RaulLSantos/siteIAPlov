@@ -8,8 +8,18 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+dist
 dist-ssr
 *.local
+
+# Environment and deployment secrets
+.env
+.env.*
+!.env.example
+*.pem
+*_deploy_key
+*_deploy_key.pub
+deploy-keys/
 
 # Editor directories and files
 .vscode/*

@@ -1,0 +1,13 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html/
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -f docs/index.html $DEPLOYPATH
+    - /bin/cp -f docs/inscricoes.html $DEPLOYPATH
+    - /bin/cp -f docs/*.css $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp -f docs/*.js $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp -Rf docs/assets $DEPLOYPATH
+    - /bin/cp -f docs/apple-touch-icon.png docs/favicon*.png docs/favicon.ico docs/manifest.json docs/og-image.png docs/pix-encontro-casais.png docs/programacoes.json docs/robots.txt docs/sitemap.xml $DEPLOYPATH
+    - if [ -d docs/.well-known ]; then /bin/cp -Rf docs/.well-known $DEPLOYPATH; fi
+    - if [ -f docs/.htaccess ]; then /bin/cp -f docs/.htaccess $DEPLOYPATH; fi

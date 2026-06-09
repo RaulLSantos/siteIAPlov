@@ -1,0 +1,5 @@
+Contact: mailto:contato@promessacascavel.com.br
+Preferred-Languages: pt-BR
+Canonical: https://promessacascavel.com.br/.well-known/security.txt
+Policy: https://promessacascavel.com.br/
+Expires: 2027-06-09T23:59:59-03:00
