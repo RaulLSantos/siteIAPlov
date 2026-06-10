@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
+playwright-report
+test-results
+.vite
 *.local
 
 # Environment and deployment secrets
@@ -17,6 +21,7 @@ dist-ssr
 .env.*
 !.env.example
 *.pem
+*.key
 *_deploy_key
 *_deploy_key.pub
 deploy-keys/

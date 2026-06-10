@@ -2,12 +2,12 @@
 deployment:
   tasks:
     - export DEPLOYPATH=$HOME/public_html/
+    - export BUILDPATH=$PWD/docs
     - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -f docs/index.html $DEPLOYPATH
-    - /bin/cp -f docs/inscricoes.html $DEPLOYPATH
-    - /bin/cp -f docs/*.css $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp -f docs/*.js $DEPLOYPATH 2>/dev/null || true
-    - /bin/cp -Rf docs/assets $DEPLOYPATH
-    - /bin/cp -f docs/apple-touch-icon.png docs/favicon*.png docs/favicon.ico docs/manifest.json docs/og-image.png docs/pix-encontro-casais.png docs/programacoes.json docs/robots.txt docs/sitemap.xml $DEPLOYPATH
-    - if [ -d docs/.well-known ]; then /bin/cp -Rf docs/.well-known $DEPLOYPATH; fi
-    - if [ -f docs/.htaccess ]; then /bin/cp -f docs/.htaccess $DEPLOYPATH; fi
+    - /bin/cp -f $BUILDPATH/*.html $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp -f $BUILDPATH/*.css $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp -f $BUILDPATH/*.js $DEPLOYPATH 2>/dev/null || true
+    - if [ -d "$BUILDPATH/assets" ]; then /bin/rm -rf "$DEPLOYPATH/assets"; /bin/cp -Rf "$BUILDPATH/assets" "$DEPLOYPATH"; fi
+    - /bin/cp -f $BUILDPATH/apple-touch-icon.png $BUILDPATH/favicon*.png $BUILDPATH/favicon.ico $BUILDPATH/manifest.json $BUILDPATH/og-image.png $BUILDPATH/pix-encontro-casais.png $BUILDPATH/programacoes.json $BUILDPATH/robots.txt $BUILDPATH/sitemap.xml $DEPLOYPATH 2>/dev/null || true
+    - if [ -d "$BUILDPATH/.well-known" ]; then /bin/rm -rf "$DEPLOYPATH/.well-known"; /bin/cp -Rf "$BUILDPATH/.well-known" "$DEPLOYPATH"; fi
+    - if [ -f "$BUILDPATH/.htaccess" ]; then /bin/cp -f "$BUILDPATH/.htaccess" "$DEPLOYPATH"; fi
