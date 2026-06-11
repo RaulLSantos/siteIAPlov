@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
-import logoLocal from "@/assets/logo-iap.jpg";
+import logoLocal from "@/assets/logo-iap.png";
 
 const navItems = [
     { label: "Home", href: "#home" },
